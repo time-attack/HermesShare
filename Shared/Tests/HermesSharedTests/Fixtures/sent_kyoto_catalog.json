@@ -1,0 +1,205 @@
+{
+  "version": 1,
+  "title": "Where to stay in Kyoto",
+  "subtitle": "5 stays under $250 \u00b7 tap to explore rooms",
+  "accentColorHex": "#CBA35C",
+  "background": {
+    "kind": "atmosphere",
+    "colorsHex": [
+      "#CBA35C"
+    ]
+  },
+  "root": {
+    "type": "photoCatalog",
+    "catalogItems": [
+      {
+        "id": "millennials",
+        "heroImageUrl": "https://live.staticflickr.com/7388/11454446566_e621b2b380_b.jpg",
+        "title": "The Millennials Kyoto",
+        "subtitle": "Nakagyo \u00b7 \u2605 4.4",
+        "priceText": "from $88",
+        "priceUnit": "night",
+        "rooms": [
+          {
+            "id": "millennials-r0",
+            "imageUrl": "https://live.staticflickr.com/7388/11454446566_e621b2b380_b.jpg",
+            "name": "Smart Pod",
+            "price": "$88"
+          },
+          {
+            "id": "millennials-r1",
+            "imageUrl": "https://live.staticflickr.com/8154/6998163036_0fb423df2b.jpg",
+            "name": "Pod + Desk",
+            "price": "$104"
+          },
+          {
+            "id": "millennials-r2",
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f4/Ccpr_CLASS_ROOM.jpg",
+            "name": "Twin Pod",
+            "price": "$132"
+          },
+          {
+            "id": "millennials-r3",
+            "imageUrl": "https://live.staticflickr.com/3240/2882276891_f36bbcfdc4_b.jpg",
+            "name": "Lounge Suite",
+            "price": "$168"
+          }
+        ],
+        "tags": [
+          "Free WiFi",
+          "Smart pods",
+          "Lounge",
+          "24h check-in"
+        ],
+        "detail": "Smart sleeping pods with adjustable beds and a co-working lounge, steps from Nishiki Market.",
+        "fallbackSystemImage": "bed.double.fill"
+      },
+      {
+        "id": "sakura",
+        "heroImageUrl": "https://live.staticflickr.com/75/205559146_f3907573dd_b.jpg",
+        "title": "Sakura Terrace",
+        "subtitle": "Kyoto Stn. \u00b7 \u2605 4.3",
+        "priceText": "from $110",
+        "priceUnit": "night",
+        "rooms": [
+          {
+            "id": "sakura-r0",
+            "imageUrl": "https://live.staticflickr.com/75/205559146_f3907573dd_b.jpg",
+            "name": "Tatami Room",
+            "price": "$110"
+          },
+          {
+            "id": "sakura-r1",
+            "imageUrl": "https://live.staticflickr.com/4099/4764435682_dedb2b46dd_b.jpg",
+            "name": "Garden View",
+            "price": "$142"
+          },
+          {
+            "id": "sakura-r2",
+            "imageUrl": "https://live.staticflickr.com/7080/7379879680_0dd769323b.jpg",
+            "name": "Family Tatami",
+            "price": "$185"
+          },
+          {
+            "id": "sakura-r3",
+            "imageUrl": "https://live.staticflickr.com/5568/15058468571_21c2deb4ba_b.jpg",
+            "name": "Terrace Suite",
+            "price": "$228"
+          }
+        ],
+        "tags": [
+          "Onsen",
+          "Free breakfast",
+          "Garden",
+          "Shuttle"
+        ],
+        "detail": "Tatami rooms around a courtyard garden and a communal bath, five minutes from Kyoto Station.",
+        "fallbackSystemImage": "bed.double.fill"
+      },
+      {
+        "id": "rihga",
+        "heroImageUrl": "https://live.staticflickr.com/5180/5530825482_0ae56528d2_b.jpg",
+        "title": "Rihga Royal Kyoto",
+        "subtitle": "Shimogyo \u00b7 \u2605 4.2",
+        "priceText": "from $175",
+        "priceUnit": "night",
+        "rooms": [
+          {
+            "id": "rihga-r0",
+            "imageUrl": "https://live.staticflickr.com/5180/5530825482_0ae56528d2_b.jpg",
+            "name": "Superior City",
+            "price": "$175"
+          },
+          {
+            "id": "rihga-r1",
+            "imageUrl": "https://live.staticflickr.com/6136/5928382513_b724bfdef0_b.jpg",
+            "name": "Deluxe Twin",
+            "price": "$204"
+          },
+          {
+            "id": "rihga-r2",
+            "imageUrl": "https://live.staticflickr.com/43/79235018_6315e8ceb9_b.jpg",
+            "name": "Corner Suite",
+            "price": "$236"
+          }
+        ],
+        "tags": [
+          "City view",
+          "Gym",
+          "3 restaurants",
+          "Bar"
+        ],
+        "detail": "A full-service city hotel with skyline rooms and three restaurants beside Kyoto Station.",
+        "fallbackSystemImage": "bed.double.fill"
+      },
+      {
+        "id": "ethnography",
+        "heroImageUrl": "https://live.staticflickr.com/4071/4664522532_0fee802ba5_b.jpg",
+        "title": "Hotel Ethnography Gion",
+        "subtitle": "Gion \u00b7 \u2605 4.6",
+        "priceText": "from $198",
+        "priceUnit": "night",
+        "rooms": [
+          {
+            "id": "ethnography-r0",
+            "imageUrl": "https://live.staticflickr.com/4071/4664522532_0fee802ba5_b.jpg",
+            "name": "Machiya Room",
+            "price": "$198"
+          },
+          {
+            "id": "ethnography-r1",
+            "imageUrl": "https://live.staticflickr.com/2441/3943622305_7045d2a6f4_b.jpg",
+            "name": "Garden Machiya",
+            "price": "$226"
+          },
+          {
+            "id": "ethnography-r2",
+            "imageUrl": "https://live.staticflickr.com/3424/3882392901_75e8088029_b.jpg",
+            "name": "Corner Suite",
+            "price": "$248"
+          }
+        ],
+        "tags": [
+          "Machiya",
+          "Private bath",
+          "Tea service",
+          "Concierge"
+        ],
+        "detail": "Restored machiya townhouse rooms off a quiet Gion lane, with a private bath and tea service.",
+        "fallbackSystemImage": "bed.double.fill"
+      },
+      {
+        "id": "node",
+        "heroImageUrl": "https://live.staticflickr.com/2561/3921794895_e740defc95.jpg",
+        "title": "Node Hotel",
+        "subtitle": "Karasuma \u00b7 \u2605 4.5",
+        "priceText": "from $215",
+        "priceUnit": "night",
+        "rooms": [
+          {
+            "id": "node-r0",
+            "imageUrl": "https://live.staticflickr.com/2561/3921794895_e740defc95.jpg",
+            "name": "Design King",
+            "price": "$215"
+          },
+          {
+            "id": "node-r1",
+            "imageUrl": "https://live.staticflickr.com/3125/3158442843_ca3d79f0d7.jpg",
+            "name": "Studio",
+            "price": "$238"
+          }
+        ],
+        "tags": [
+          "Design",
+          "Art gallery",
+          "Cafe",
+          "Bikes"
+        ],
+        "detail": "A design hotel with a curated art gallery and a ground-floor cafe in central Karasuma.",
+        "fallbackSystemImage": "bed.double.fill"
+      }
+    ],
+    "initialExpandedId": "ethnography",
+    "confirmLabel": "Check availability"
+  }
+}

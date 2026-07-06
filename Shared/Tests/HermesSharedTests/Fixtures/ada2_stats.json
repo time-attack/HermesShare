@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "title": "Deploy health",
+  "subtitle": "photon-prod · last 24h",
+  "accentColorHex": "#0A84FF",
+  "background": { "kind": "plain" },
+  "root": {
+    "type": "vstack", "spacing": 16, "alignment": "leading",
+    "children": [
+      { "type": "gaugeCluster", "gauges": [
+        { "label": "Uptime", "value": 0.992, "valueText": "99.2%", "colorHex": "#30D158" },
+        { "label": "p95 latency", "value": 0.47, "valueText": "142ms", "colorHex": "#FFD60A" },
+        { "label": "Error rate", "value": 0.08, "valueText": "0.08%", "colorHex": "#FF453A" }
+      ]},
+      { "type": "card", "padding": 16, "cornerRadius": 18, "child": {
+        "type": "vstack", "spacing": 12, "alignment": "leading",
+        "children": [
+          { "type": "text", "text": "Requests by region", "style": { "role": "subheadline", "weight": "semibold" } },
+          { "type": "barChart", "maxValue": 812, "bars": [
+            { "label": "us-west", "value": 812, "valueLabel": "812k", "colorHex": "#0A84FF" },
+            { "label": "us-east", "value": 546, "valueLabel": "546k", "colorHex": "#0A84FF" },
+            { "label": "eu-west", "value": 301, "valueLabel": "301k", "colorHex": "#5E5CE6" },
+            { "label": "ap-ne", "value": 128, "valueLabel": "128k", "colorHex": "#5E5CE6" }
+          ]}
+        ]
+      }}
+    ]
+  },
+  "actions": [
+    { "id": "open-dash", "label": "Open dashboard", "systemImage": "chart.line.uptrend.xyaxis", "deepLinkURL": "hermesshare://action?id=open-dash" }
+  ]
+}

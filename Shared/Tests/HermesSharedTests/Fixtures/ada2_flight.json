@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "accentColorHex": "#4AA8FF",
+  "background": { "kind": "plain" },
+  "root": {
+    "type": "vstack", "spacing": 14, "alignment": "leading",
+    "children": [
+      { "type": "flightBoard", "board": {
+        "origin": "SFO", "destination": "HND",
+        "originCity": "San Francisco", "destinationCity": "Tokyo · Haneda",
+        "flightCode": "UA 837", "departTime": "11:20", "arriveTime": "15:05",
+        "gate": "G98", "status": "Boarding", "statusColorHex": "#4AA8FF", "progress": 0.0
+      }},
+      { "type": "card", "padding": 16, "cornerRadius": 18, "child": {
+        "type": "vstack", "spacing": 12, "alignment": "leading",
+        "children": [
+          { "type": "text", "text": "Before you board", "style": { "role": "subheadline", "weight": "semibold" } },
+          { "type": "checklist", "items": [
+            { "text": "Passport & visa", "state": "checked" },
+            { "text": "Checked in — seat 34K", "state": "checked" },
+            { "text": "Drop bags at counter 4", "detail": "closes 10:35", "state": "unchecked" },
+            { "text": "At gate G98 by 10:50", "state": "unchecked" }
+          ]}
+        ]
+      }}
+    ]
+  },
+  "actions": [
+    { "id": "boarding-pass", "label": "Show boarding pass", "systemImage": "qrcode", "deepLinkURL": "hermesshare://action?id=boarding-pass" }
+  ]
+}

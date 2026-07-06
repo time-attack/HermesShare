@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "title": "Kyoto — Day 2",
+  "subtitle": "Tuesday · what's next",
+  "accentColorHex": "#FF6B35",
+  "background": { "kind": "plain" },
+  "root": {
+    "type": "vstack", "spacing": 14, "alignment": "leading",
+    "children": [
+      { "type": "hstack", "spacing": 12, "alignment": "center", "children": [
+        { "type": "dateBadge", "month": "Jul", "day": "8", "weekday": "Tue", "colorHex": "#FF6B35" },
+        { "type": "vstack", "spacing": 4, "alignment": "leading", "children": [
+          { "type": "rating", "value": 5, "maxValue": 5, "label": "Higashiyama" },
+          { "type": "tagRow", "labels": ["Temples", "Tea house", "Night market"] }
+        ]}
+      ]},
+      { "type": "card", "padding": 16, "cornerRadius": 18, "child": {
+        "type": "timeline", "entries": [
+          { "time": "8:30", "title": "Fushimi Inari", "subtitle": "Beat the crowds", "state": "past" },
+          { "time": "11:00", "title": "Nishiki Market", "subtitle": "Street-food lunch", "state": "past" },
+          { "time": "14:00", "title": "Kiyomizu-dera", "subtitle": "You're here now", "state": "current" },
+          { "time": "17:30", "title": "Tea ceremony", "subtitle": "Booked · Camellia", "state": "future" },
+          { "time": "19:30", "title": "Dinner — vote below", "state": "future" }
+        ]
+      }},
+      { "type": "card", "padding": 16, "cornerRadius": 18, "child": {
+        "type": "vstack", "spacing": 10, "alignment": "leading", "children": [
+          { "type": "text", "text": "Tonight's dinner", "style": { "role": "subheadline", "weight": "semibold" } },
+          { "type": "optionPicker", "confirmLabel": "Vote", "pickerStyle": "list", "options": [
+            { "id": "kaiseki", "label": "Kaiseki tasting", "sublabel": "Gion · 8 courses", "systemImage": "leaf.fill", "badge": "¥12,000" },
+            { "id": "yakitori", "label": "Yakitori counter", "sublabel": "Pontocho · no wait", "systemImage": "flame.fill", "badge": "¥3,800" },
+            { "id": "udon", "label": "Late-night udon", "sublabel": "Cozy · 5 min walk", "systemImage": "cup.and.saucer.fill", "badge": "¥1,400" }
+          ]}
+        ]
+      }}
+    ]
+  }
+}

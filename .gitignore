@@ -1,0 +1,23 @@
+# Xcode / build artifacts
+build/
+DerivedData/
+*.xcuserstate
+**/xcuserdata/
+*.xcodeproj/project.xcworkspace/
+*.moved-aside
+
+# Swift Package Manager
+.build/
+**/.build/
+.swiftpm/
+Package.resolved
+
+# Generated Xcode project (regenerate with `xcodegen generate` from project.yml)
+HermesShare.xcodeproj/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Session scratch — dispatch prompt files
+.*_prompt.txt

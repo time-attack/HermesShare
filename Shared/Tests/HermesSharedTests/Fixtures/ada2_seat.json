@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "title": "Pick your seat",
+  "subtitle": "BR 26 · TPE → SFO · Economy",
+  "accentColorHex": "#00A868",
+  "background": { "kind": "plain" },
+  "root": {
+    "type": "card", "padding": 16, "cornerRadius": 18, "child": {
+      "type": "vstack", "spacing": 12, "alignment": "leading",
+      "children": [
+        { "type": "hstack", "spacing": 10, "alignment": "center", "children": [
+          { "type": "icon", "systemName": "airplane", "sizePt": 20, "colorHex": "#00A868" },
+          { "type": "statusBadge", "label": "Check-in open", "colorHex": "#00A868" },
+          { "type": "spacer" },
+          { "type": "text", "text": "Boeing 787-9", "style": { "role": "footnote", "colorHex": "#8E8E93" } }
+        ]},
+        { "type": "seatChart", "rows": [
+          { "rowNumber": 21, "isBulkhead": true, "aisleAfterIndices": [2, 5], "seats": [
+            { "id": "21A", "letter": "A", "state": "taken" }, { "id": "21B", "letter": "B", "state": "available" }, { "id": "21C", "letter": "C", "state": "taken" },
+            { "id": "21D", "letter": "D", "state": "taken" }, { "id": "21E", "letter": "E", "state": "available" }, { "id": "21F", "letter": "F", "state": "available" },
+            { "id": "21G", "letter": "G", "state": "available" }, { "id": "21H", "letter": "H", "state": "available" }, { "id": "21K", "letter": "K", "state": "taken" }
+          ]},
+          { "rowNumber": 22, "isExitRow": true, "hasExtraLegroom": true, "aisleAfterIndices": [2, 5], "seats": [
+            { "id": "22A", "letter": "A", "state": "available" }, { "id": "22B", "letter": "B", "state": "available" }, { "id": "22C", "letter": "C", "state": "available" },
+            { "id": "22D", "letter": "D", "state": "available" }, { "id": "22E", "letter": "E", "state": "taken" }, { "id": "22F", "letter": "F", "state": "available" },
+            { "id": "22G", "letter": "G", "state": "available" }, { "id": "22H", "letter": "H", "state": "available" }, { "id": "22K", "letter": "K", "state": "available" }
+          ]},
+          { "rowNumber": 23, "aisleAfterIndices": [2, 5], "seats": [
+            { "id": "23A", "letter": "A", "state": "taken" }, { "id": "23B", "letter": "B", "state": "taken" }, { "id": "23C", "letter": "C", "state": "available" },
+            { "id": "23D", "letter": "D", "state": "available" }, { "id": "23E", "letter": "E", "state": "available" }, { "id": "23F", "letter": "F", "state": "taken" },
+            { "id": "23G", "letter": "G", "state": "taken" }, { "id": "23H", "letter": "H", "state": "taken" }, { "id": "23K", "letter": "K", "state": "selected" }
+          ]},
+          { "rowNumber": 24, "aisleAfterIndices": [2, 5], "seats": [
+            { "id": "24A", "letter": "A", "state": "available" }, { "id": "24B", "letter": "B", "state": "available" }, { "id": "24C", "letter": "C", "state": "taken" },
+            { "id": "24D", "letter": "D", "state": "taken" }, { "id": "24E", "letter": "E", "state": "taken" }, { "id": "24F", "letter": "F", "state": "available" },
+            { "id": "24G", "letter": "G", "state": "available" }, { "id": "24H", "letter": "H", "state": "available" }, { "id": "24K", "letter": "K", "state": "available" }
+          ]}
+        ]}
+      ]
+    }
+  }
+}

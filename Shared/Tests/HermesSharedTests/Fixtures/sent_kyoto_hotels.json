@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "title": "Where to stay in Kyoto",
+  "subtitle": "5 stays under $250 \u00b7 per night",
+  "accentColorHex": "#CBA35C",
+  "background": {
+    "kind": "atmosphere",
+    "colorsHex": [
+      "#CBA35C"
+    ]
+  },
+  "root": {
+    "type": "vstack",
+    "spacing": 16,
+    "alignment": "leading",
+    "children": [
+      {
+        "type": "card",
+        "child": {
+          "type": "vstack",
+          "spacing": 12,
+          "alignment": "leading",
+          "children": [
+            {
+              "type": "hstack",
+              "spacing": 6,
+              "children": [
+                {
+                  "type": "icon",
+                  "systemName": "calendar",
+                  "sizePt": 13,
+                  "colorHex": "#CBA35C"
+                },
+                {
+                  "type": "text",
+                  "text": "Apr 12\u201315 \u00b7 3 nights",
+                  "style": {
+                    "role": "subheadline",
+                    "weight": "semibold"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "mediaList",
+              "mediaItems": [
+                {
+                  "imageUrl": "https://live.staticflickr.com/3683/10235585504_182f812109.jpg",
+                  "title": "The Millennials Kyoto",
+                  "subtitle": "Nakagyo \u00b7 \u2605 4.4",
+                  "trailing": "$88",
+                  "trailingSub": "night",
+                  "fallbackSystemImage": "bed.double.fill"
+                },
+                {
+                  "imageUrl": "https://live.staticflickr.com/75/205559146_f3907573dd_b.jpg",
+                  "title": "Sakura Terrace",
+                  "subtitle": "Kyoto Stn. \u00b7 \u2605 4.3",
+                  "trailing": "$110",
+                  "trailingSub": "night",
+                  "fallbackSystemImage": "bed.double.fill"
+                },
+                {
+                  "imageUrl": "https://live.staticflickr.com/5180/5530825482_0ae56528d2_b.jpg",
+                  "title": "Rihga Royal Kyoto",
+                  "subtitle": "Shimogyo \u00b7 \u2605 4.2",
+                  "trailing": "$175",
+                  "trailingSub": "night",
+                  "fallbackSystemImage": "bed.double.fill"
+                },
+                {
+                  "imageUrl": "https://live.staticflickr.com/65535/54379225600_7a0878df7d_b.jpg",
+                  "title": "Hotel Ethnography Gion",
+                  "subtitle": "Gion \u00b7 \u2605 4.6",
+                  "trailing": "$198",
+                  "trailingSub": "night",
+                  "fallbackSystemImage": "bed.double.fill"
+                },
+                {
+                  "imageUrl": "https://live.staticflickr.com/2561/3921794895_e740defc95.jpg",
+                  "title": "Node Hotel",
+                  "subtitle": "Karasuma \u00b7 \u2605 4.5",
+                  "trailing": "$215",
+                  "trailingSub": "night",
+                  "fallbackSystemImage": "bed.double.fill"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

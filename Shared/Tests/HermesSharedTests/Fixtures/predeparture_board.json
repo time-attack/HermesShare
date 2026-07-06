@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "title": "Flight to San Francisco",
+  "subtitle": "Wed · departs 7:45 AM",
+  "accentColorHex": "#0A84FF",
+  "background": { "kind": "plain" },
+  "root": {
+    "type": "vstack",
+    "spacing": 16,
+    "alignment": "leading",
+    "children": [
+      {
+        "type": "flightBoard",
+        "board": {
+          "origin": "JFK",
+          "destination": "SFO",
+          "originCity": "New York",
+          "destinationCity": "San Francisco",
+          "flightCode": "UA 1",
+          "departTime": "7:45",
+          "arriveTime": "11:12",
+          "gate": "12",
+          "status": "On time · T-12h",
+          "statusColorHex": "#30D158",
+          "progress": null
+        }
+      },
+      {
+        "type": "card",
+        "child": {
+          "type": "vstack",
+          "spacing": 8,
+          "children": [
+            {
+              "type": "hstack",
+              "spacing": 6,
+              "children": [
+                { "type": "icon", "systemName": "checklist", "sizePt": 13, "colorHex": "#0A84FF" },
+                { "type": "text", "text": "Before you go", "style": { "role": "subheadline", "weight": "semibold" } }
+              ]
+            },
+            {
+              "type": "checklist",
+              "items": [
+                { "text": "Check in online", "state": "checked" },
+                { "text": "Passport / ID in bag", "state": "unchecked" },
+                { "text": "Charge devices", "state": "unchecked" },
+                { "text": "Download boarding pass", "state": "unchecked" },
+                { "text": "Book airport ride", "state": "unchecked", "detail": "Leave by 5:15 AM" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "type": "card",
+        "child": {
+          "type": "vstack",
+          "spacing": 4,
+          "children": [
+            {
+              "type": "keyValueRow",
+              "key": "Seat",
+              "value": "3A · Business",
+              "iconSystemName": "person.crop.circle"
+            },
+            {
+              "type": "keyValueRow",
+              "key": "Aircraft",
+              "value": "Boeing 777-300ER · 6h 27m nonstop",
+              "iconSystemName": "airplane"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "actions": [
+    {
+      "id": "remind_2h",
+      "label": "Remind me 2h before departure",
+      "systemImage": "bell.fill",
+      "deepLinkURL": "hermesshare://action?id=remind_2h"
+    }
+  ]
+}

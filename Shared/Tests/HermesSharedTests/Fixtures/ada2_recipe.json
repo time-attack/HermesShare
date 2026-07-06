@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "accentColorHex": "#E8794A",
+  "background": { "kind": "plain" },
+  "root": {
+    "type": "vstack", "spacing": 14, "alignment": "leading",
+    "children": [
+      { "type": "platedDish", "dish": {
+        "title": "Miso-Butter Ramen", "caption": "Serves 2 · 35 min",
+        "foodColorHex": "#D9902E", "garnishColorHex": "#5FA845", "seed": 42, "steam": true
+      }},
+      { "type": "card", "padding": 16, "cornerRadius": 18, "child": {
+        "type": "vstack", "spacing": 12, "alignment": "leading",
+        "children": [
+          { "type": "rating", "value": 4.5, "maxValue": 5, "label": "Weeknight favorite" },
+          { "type": "tagRow", "labels": ["Ramen noodles", "White miso", "Butter", "Sweet corn", "Scallion", "Soft egg"] },
+          { "type": "text", "text": "Method", "style": { "role": "subheadline", "weight": "semibold" } },
+          { "type": "checklist", "items": [
+            { "text": "Simmer broth with miso & butter", "state": "checked" },
+            { "text": "Cook noodles 3 min", "state": "checked" },
+            { "text": "Soft-boil eggs 6:30", "detail": "ice bath after", "state": "unchecked" },
+            { "text": "Assemble & top with corn", "state": "unchecked" }
+          ]}
+        ]
+      }}
+    ]
+  },
+  "actions": [
+    { "id": "start-cooking", "label": "Start cooking", "systemImage": "flame.fill", "deepLinkURL": "hermesshare://action?id=start-cooking" }
+  ]
+}

@@ -1,0 +1,99 @@
+name: HermesShare
+
+options:
+  bundleIdPrefix: com.hermesshare
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    DEVELOPMENT_TEAM: 6PPS68Y9RP        # OU of "Apple Development: SIna Matian (TA89948CWL)"
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+
+packages:
+  HermesShared:
+    path: Shared
+
+targets:
+
+  # ---------------- Host / container app ----------------
+  HermesShare:
+    type: application
+    platform: iOS
+    sources:
+      - HermesShare/Sources
+      - HermesShare/Resources
+    dependencies:
+      - package: HermesShared
+      - target: HermesShareExtension          # embedded automatically
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hermesshare.app
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_UILaunchScreen_Generation: "YES"
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: "YES"
+    info:
+      path: HermesShare/Info.plist
+      properties:
+        CFBundleDisplayName: HermesShare
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        CFBundleURLTypes:
+          - CFBundleURLName: com.hermesshare.app.deeplink
+            CFBundleURLSchemes:
+              - hermesshare
+
+  # ---------------- iMessage App Extension ----------------
+  HermesShareExtension:
+    type: app-extension.messages
+    platform: iOS
+    sources:
+      - HermesShareExtension/Sources
+      - HermesShareExtension/Resources
+    dependencies:
+      - package: HermesShared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hermesshare.app.MessagesExtension
+        ASSETCATALOG_COMPILER_APPICON_NAME: iMessage App Icon
+    info:
+      path: HermesShareExtension/Info.plist
+      properties:
+        CFBundleDisplayName: HermesShare
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.message-payload-provider
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).MessagesViewController
+
+  # ---------------- Unit tests for the shared model ----------------
+  HermesSharedTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - Shared/Tests/HermesSharedTests
+    dependencies:
+      - package: HermesShared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hermesshare.app.SharedTests
+        GENERATE_INFOPLIST_FILE: "YES"
+
+schemes:
+  HermesShare:
+    build:
+      targets:
+        HermesShare: all
+        HermesShareExtension: all
+    run:
+      config: Debug
+    test:
+      targets:
+        - HermesSharedTests

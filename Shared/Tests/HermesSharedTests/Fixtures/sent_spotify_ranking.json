@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "title": "Your Top Songs",
+  "subtitle": "Sina's 2025 Wrapped",
+  "accentColorHex": "#1DB954",
+  "background": {
+    "kind": "atmosphere",
+    "colorsHex": [
+      "#1DB954"
+    ]
+  },
+  "root": {
+    "type": "vstack",
+    "spacing": 16,
+    "alignment": "leading",
+    "children": [
+      {
+        "type": "card",
+        "child": {
+          "type": "hstack",
+          "spacing": 10,
+          "alignment": "top",
+          "children": [
+            {
+              "type": "stat",
+              "value": "58,432",
+              "label": "Minutes",
+              "iconSystemName": "clock.fill",
+              "colorHex": "#1DB954"
+            },
+            {
+              "type": "stat",
+              "value": "1,452",
+              "label": "Songs",
+              "iconSystemName": "music.note",
+              "colorHex": "#1DB954"
+            },
+            {
+              "type": "stat",
+              "value": "94",
+              "label": "Artists",
+              "iconSystemName": "person.2.fill",
+              "colorHex": "#1DB954"
+            }
+          ]
+        }
+      },
+      {
+        "type": "card",
+        "child": {
+          "type": "vstack",
+          "spacing": 12,
+          "alignment": "leading",
+          "children": [
+            {
+              "type": "hstack",
+              "spacing": 6,
+              "children": [
+                {
+                  "type": "icon",
+                  "systemName": "trophy.fill",
+                  "sizePt": 13,
+                  "colorHex": "#1DB954"
+                },
+                {
+                  "type": "text",
+                  "text": "Top 5 this year",
+                  "style": {
+                    "role": "subheadline",
+                    "weight": "semibold"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "mediaList",
+              "mediaItems": [
+                {
+                  "rank": 1,
+                  "imageUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/a6/6e/bf/a66ebf79-5008-8948-b352-a790fc87446b/19UM1IM04638.rgb.jpg/300x300bb.jpg",
+                  "title": "Blinding Lights",
+                  "subtitle": "The Weeknd",
+                  "trailing": "1,248",
+                  "trailingSub": "plays"
+                },
+                {
+                  "rank": 2,
+                  "imageUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/8c/67/ff/8c67ff91-31c3-3fef-1884-ce3ec89f3af4/196589946874.jpg/300x300bb.jpg",
+                  "title": "Flowers",
+                  "subtitle": "Miley Cyrus",
+                  "trailing": "1,032",
+                  "trailingSub": "plays"
+                },
+                {
+                  "rank": 3,
+                  "imageUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/2a/19/fb/2a19fb85-2f70-9e44-f2a9-82abe679b88e/886449990061.jpg/300x300bb.jpg",
+                  "title": "As It Was",
+                  "subtitle": "Harry Styles",
+                  "trailing": "917",
+                  "trailingSub": "plays"
+                },
+                {
+                  "rank": 4,
+                  "imageUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/3d/01/f2/3d01f2e5-5a08-835f-3d30-d031720b2b80/22UM1IM07364.rgb.jpg/300x300bb.jpg",
+                  "title": "Anti-Hero",
+                  "subtitle": "Taylor Swift",
+                  "trailing": "864",
+                  "trailingSub": "plays"
+                },
+                {
+                  "rank": 5,
+                  "imageUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/bd/3b/a9/bd3ba9fb-9609-144f-bcfe-ead67b5f6ab3/196589564931.jpg/300x300bb.jpg",
+                  "title": "Kill Bill",
+                  "subtitle": "SZA",
+                  "trailing": "792",
+                  "trailingSub": "plays"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "actions": [
+    {
+      "id": "open_spotify",
+      "label": "Open in Spotify",
+      "systemImage": "play.circle.fill",
+      "deepLinkURL": "https://open.spotify.com/genre/2025-wrapped-page"
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "title": "Your Top Podcasts",
+  "subtitle": "This month \u00b7 60h total",
+  "accentColorHex": "#9D4EDD",
+  "background": {
+    "kind": "atmosphere",
+    "colorsHex": [
+      "#9D4EDD"
+    ]
+  },
+  "root": {
+    "type": "vstack",
+    "spacing": 16,
+    "alignment": "leading",
+    "children": [
+      {
+        "type": "card",
+        "child": {
+          "type": "vstack",
+          "spacing": 12,
+          "alignment": "leading",
+          "children": [
+            {
+              "type": "hstack",
+              "spacing": 6,
+              "children": [
+                {
+                  "type": "icon",
+                  "systemName": "headphones",
+                  "sizePt": 13,
+                  "colorHex": "#9D4EDD"
+                },
+                {
+                  "type": "text",
+                  "text": "Most listened",
+                  "style": {
+                    "role": "subheadline",
+                    "weight": "semibold"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "mediaList",
+              "mediaItems": [
+                {
+                  "rank": 1,
+                  "imageUrl": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/ab/64/66/ab6466a9-9a7d-e20e-7a3d-bc5be37d29ce/mza_15084852813176276273.jpg/300x300bb.jpg",
+                  "title": "The Daily",
+                  "subtitle": "The New York Times",
+                  "trailing": "18h",
+                  "trailingSub": "listened",
+                  "fallbackSystemImage": "mic.fill"
+                },
+                {
+                  "rank": 2,
+                  "imageUrl": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/9a/d3/19/9ad31912-0b5a-a16e-2d7c-9fd074698b9c/mza_8994222203629500925.jpg/300x300bb.jpg",
+                  "title": "Huberman Lab",
+                  "subtitle": "Scicomm Media",
+                  "trailing": "14h",
+                  "trailingSub": "listened",
+                  "fallbackSystemImage": "mic.fill"
+                },
+                {
+                  "rank": 3,
+                  "imageUrl": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/a8/e1/de/a8e1deff-9f88-4e55-a541-b0dc793c0cdc/mza_11539673419613154037.jpg/300x300bb.jpg",
+                  "title": "Acquired",
+                  "subtitle": "Ben Gilbert and David Rosenthal",
+                  "trailing": "11h",
+                  "trailingSub": "listened",
+                  "fallbackSystemImage": "mic.fill"
+                },
+                {
+                  "rank": 4,
+                  "imageUrl": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/b1/93/5f/b1935f9f-35be-9144-e813-626bd8dabfb4/mza_4132654708551836825.jpg/300x300bb.jpg",
+                  "title": "SmartLess",
+                  "subtitle": "Jason Bateman, Sean Hayes, Will Arnett",
+                  "trailing": "9h",
+                  "trailingSub": "listened",
+                  "fallbackSystemImage": "mic.fill"
+                },
+                {
+                  "rank": 5,
+                  "imageUrl": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts115/v4/3e/e3/9c/3ee39c89-de08-47a6-7f3d-3849cef6d255/mza_16657851278549137484.png/300x300bb.jpg",
+                  "title": "Lex Fridman Podcast",
+                  "subtitle": "Lex Fridman",
+                  "trailing": "8h",
+                  "trailingSub": "listened",
+                  "fallbackSystemImage": "mic.fill"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
