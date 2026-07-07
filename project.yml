@@ -79,11 +79,27 @@ targets:
     platform: iOS
     sources:
       - Shared/Tests/HermesSharedTests
+    resources:
+      - path: Shared/Tests/HermesSharedTests/Fixtures
+        type: folder
     dependencies:
       - package: HermesShared
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.hermesshare.app.SharedTests
+        GENERATE_INFOPLIST_FILE: "YES"
+
+  HermesShareUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - HermesShareUITests
+    dependencies:
+      - target: HermesShare
+      - package: HermesShared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hermesshare.app.UITests
         GENERATE_INFOPLIST_FILE: "YES"
 
 schemes:
@@ -97,3 +113,4 @@ schemes:
     test:
       targets:
         - HermesSharedTests
+        - HermesShareUITests

@@ -21,3 +21,6 @@ HermesShare.xcodeproj/
 
 # Session scratch — dispatch prompt files
 .*_prompt.txt
+
+# Local screenshot dumps at repo root (canonical assets: docs/screenshots/launch/)
+/screenshots/

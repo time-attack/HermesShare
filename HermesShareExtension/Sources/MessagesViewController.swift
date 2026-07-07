@@ -382,10 +382,20 @@ final class MessagesViewController: MSMessagesAppViewController {
         message.url = components.url
 
         let template = MSMessageTemplateLayout()
-        template.caption = layout.title ?? "HermesShare"
-        template.subcaption = layout.subtitle
-        template.trailingCaption = "HermesShare"
-        template.image = CardThumbnailRenderer.image(for: layout)
+        let caption = layout.title ?? "HermesShare"
+        let thumb = CardThumbnailRenderer.image(for: layout)
+        template.image = thumb
+        if thumb != nil {
+            // Real labels live in caption/subcaption. imageTitle is required when image is set
+            // (spectrum-ts pairing) but Apple also renders imageTitle in a footer strip — use an
+            // invisible placeholder so the title is not duplicated (device-confirmed 2026-07-07).
+            template.caption = caption
+            template.subcaption = layout.subtitle
+            template.imageTitle = "\u{2060}"
+        } else {
+            template.caption = caption
+            template.subcaption = layout.subtitle
+        }
         message.layout = template
         message.summaryText = layout.title ?? "HermesShare card"
         // Cache at compose time: if this bubble is later selected with a nil url (see
@@ -572,13 +582,19 @@ private struct DebugComposeGallery: View {
         ScrollView {
             VStack(spacing: 8) {
                 Text("DEBUG compose").font(.headline)
+                    .accessibilityIdentifier("hermes-debug-compose-title")
                 ForEach(fixtures, id: \.0) { name, layout in
                     Button(name) { onInsert(layout) }
                         .buttonStyle(.borderedProminent)
+                        .accessibilityIdentifier("hermes-compose-\(Self.slug(name))")
                 }
             }
             .padding()
         }
+    }
+
+    private static func slug(_ name: String) -> String {
+        name.lowercased().replacingOccurrences(of: " ", with: "-")
     }
 }
 #endif
@@ -590,24 +606,9 @@ private struct DebugComposeGallery: View {
 enum CardThumbnailRenderer {
     @MainActor
     static func image(for layout: HermesLayout) -> UIImage? {
-        let width: CGFloat = 300
-        let view = HermesLayoutRenderer(layout: layout, presentation: .compact)
-            .frame(width: width)
-            .background(Color(.secondarySystemBackground))
+        let view = BubbleThumbnailView(layout: layout)
         let renderer = ImageRenderer(content: view)
         renderer.scale = 3
-        // ImageRenderer needs the hosting controller's view to actually be laid out with a
-        // concrete size before proposedSize/uiImage will produce real pixels — a bare
-        // `.frame(width:)` with no height often yields a nil/blank image because SwiftUI
-        // hasn't resolved an intrinsic height yet. Force layout through a real UIHostingController
-        // sized to its fitting size first, then hand that same hosting controller's view to the
-        // renderer so it renders the already-laid-out hierarchy.
-        let hosting = UIHostingController(rootView: view)
-        hosting.view.bounds = CGRect(x: 0, y: 0, width: width, height: 1)
-        let fittingSize = hosting.sizeThatFits(in: CGSize(width: width, height: .greatestFiniteMagnitude))
-        hosting.view.bounds = CGRect(x: 0, y: 0, width: width, height: max(fittingSize.height, 44))
-        hosting.view.layoutIfNeeded()
-        renderer.proposedSize = .init(width: width, height: max(fittingSize.height, 44))
         return renderer.uiImage
     }
 }

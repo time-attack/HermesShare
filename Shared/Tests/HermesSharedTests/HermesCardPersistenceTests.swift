@@ -399,9 +399,7 @@ final class HermesCardPersistenceTests: XCTestCase {
     // card's own session content or .unresolved — never another session's card.
 
     private func loadFixture(_ name: String) throws -> HermesLayout {
-        let bundle = Bundle.module
-        guard let url = bundle.url(forResource: name, withExtension: "json")
-            ?? bundle.url(forResource: name, withExtension: "json", subdirectory: "Fixtures") else {
+        guard let url = TestFixtures.url(named: name) else {
             throw XCTSkip("fixture \(name).json missing from test bundle")
         }
         return try HermesLayout.decode(from: Data(contentsOf: url))

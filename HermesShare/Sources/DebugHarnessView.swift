@@ -5,13 +5,25 @@ import SwiftUI
 import HermesShared
 
 struct DebugHarnessView: View {
-    @State private var selection: Int = 0
+    @State private var selection: Int
     @State private var jsonText: String = ""
     @State private var parseError: String?
     @State private var showingEditor = false
     @ObservedObject private var lastLink = LastDeepLink.shared
 
+    init() {
+        _selection = State(initialValue: Self.launchSampleIndex() ?? 0)
+    }
+
     private var samples: [(name: String, layout: HermesLayout)] { HermesSampleLayouts.all }
+
+    /// `-ScreenshotSample "Courier Journey"` — used by `scripts/capture_readme_screenshots.sh`.
+    private static func launchSampleIndex() -> Int? {
+        let args = ProcessInfo.processInfo.arguments
+        guard let flag = args.firstIndex(of: "-ScreenshotSample"), flag + 1 < args.count else { return nil }
+        let name = args[flag + 1]
+        return HermesSampleLayouts.all.firstIndex { $0.name == name }
+    }
 
     /// The layout currently being rendered — either the picked sample or the edited JSON.
     private var currentLayout: HermesLayout? {
