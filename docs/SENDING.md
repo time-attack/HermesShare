@@ -20,16 +20,16 @@ Requirements:
 # 2. Generate a text-free bubble thumbnail (JPEG — Photon rejects PNG)
 python3 scripts/make_thumbnail.py my-card.json thumb.jpg
 
-# 3. Host any https URL (payload lives in the query string, body optional)
-python3 -m http.server 8934 --directory /path/to/static &
-cloudflared tunnel --url http://localhost:8934   # copy the https://*.trycloudflare.com URL
+# 3. Use the permanent card host (NEVER a cloudflared tunnel — iOS probes the URL and dead
+#    tunnels cause "Safari couldn't connect / page couldn't load" when opening bubbles).
+export HERMES_CARD_HOST="${HERMES_CARD_HOST:-https://raw.githubusercontent.com/time-attack/HermesShare/main/docs/card-stub.json}"
 
 # 4. Send (from a directory with spectrum-ts installed, e.g. your Photon sidecar)
 export PHOTON_PROJECT_ID=… PHOTON_PROJECT_SECRET=… HERMES_TEAM_ID=YOUR_TEAM_ID
 node scripts/send_card_photon.mjs \
   "$(python3 -c 'import json;print(json.dumps(json.load(open("my-card.json")),separators=(",",":")))')" \
   "+15551234567" \
-  "https://YOUR-TUNNEL.trycloudflare.com/card.json" \
+  "$HERMES_CARD_HOST" \
   thumb.jpg
 ```
 
