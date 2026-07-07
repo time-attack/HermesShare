@@ -105,7 +105,9 @@ final class HermesReadmeScreenshotTests: XCTestCase {
             try data.write(to: out.appendingPathComponent("\(slug).json"))
         }
         for fixture in ["sent_flight", "sent_health", "sent_dinner",
-                        "sent_spotify_ranking", "sent_kyoto_catalog"] {
+                        "sent_spotify_ranking", "sent_kyoto_catalog",
+                        "demo_picture_restaurants", "demo_picture_flights",
+                        "demo_app_designs", "demo_collapsible_trip"] {
             let layout = try loadFixture(fixture)
             try layout.encoded(pretty: false).write(to: out.appendingPathComponent("\(fixture).json"))
         }

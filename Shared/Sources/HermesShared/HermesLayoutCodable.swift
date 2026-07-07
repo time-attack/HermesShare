@@ -37,6 +37,7 @@ extension HermesNode {
         case labels
         case month, day, weekday
         case name, detail, imageUrl
+        case subtitle
         case bars
         case selectedId, confirmLabel, pickerStyle
         // v4 scene/instrument payloads
@@ -47,6 +48,8 @@ extension HermesNode {
         case mediaItems
         // photo catalog
         case catalogItems, initialExpandedId
+        case sectionId, initiallyExpanded
+        case title, badge
     }
 
     private enum Kind: String, Codable {
@@ -59,6 +62,7 @@ extension HermesNode {
         case journeyArc, skyScene, eventTicket, sparkline, scoreBoard
         case mediaList
         case photoCatalog
+        case collapsible
     }
 
     public init(from decoder: Decoder) throws {
@@ -236,6 +240,16 @@ extension HermesNode {
                 initialExpandedId: try c.decodeIfPresent(String.self, forKey: .initialExpandedId),
                 confirmLabel: try c.decodeIfPresent(String.self, forKey: .confirmLabel)
             )
+        case .collapsible:
+            self = .collapsible(
+                id: try c.decode(String.self, forKey: .sectionId),
+                title: try c.decode(String.self, forKey: .title),
+                subtitle: try c.decodeIfPresent(String.self, forKey: .subtitle),
+                imageUrl: try c.decodeIfPresent(String.self, forKey: .imageUrl),
+                badge: try c.decodeIfPresent(String.self, forKey: .badge),
+                initiallyExpanded: try c.decodeIfPresent(Bool.self, forKey: .initiallyExpanded) ?? false,
+                child: try c.decode(HermesNode.self, forKey: .child)
+            )
         }
     }
 
@@ -392,6 +406,15 @@ extension HermesNode {
             try c.encode(items, forKey: .catalogItems)
             try c.encodeIfPresent(initialExpandedId, forKey: .initialExpandedId)
             try c.encodeIfPresent(confirmLabel, forKey: .confirmLabel)
+        case let .collapsible(id, title, subtitle, imageUrl, badge, initiallyExpanded, child):
+            try c.encode(Kind.collapsible, forKey: .type)
+            try c.encode(id, forKey: .sectionId)
+            try c.encode(title, forKey: .title)
+            try c.encodeIfPresent(subtitle, forKey: .subtitle)
+            try c.encodeIfPresent(imageUrl, forKey: .imageUrl)
+            try c.encodeIfPresent(badge, forKey: .badge)
+            if initiallyExpanded { try c.encode(true, forKey: .initiallyExpanded) }
+            try c.encode(child, forKey: .child)
         case let .unsupported(typeName):
             // Round-trips the marker only; the original payload was never decoded.
             try c.encode(typeName, forKey: .type)
@@ -448,7 +471,7 @@ extension HermesTimelineEntry {
 }
 
 extension HermesPickerOption {
-    private enum CodingKeys: String, CodingKey { case id, label, sublabel, systemImage, badge, disabled }
+    private enum CodingKeys: String, CodingKey { case id, label, sublabel, systemImage, imageUrl, badge, disabled }
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -457,6 +480,7 @@ extension HermesPickerOption {
             label: try c.decode(String.self, forKey: .label),
             sublabel: try c.decodeIfPresent(String.self, forKey: .sublabel),
             systemImage: try c.decodeIfPresent(String.self, forKey: .systemImage),
+            imageUrl: try c.decodeIfPresent(String.self, forKey: .imageUrl),
             badge: try c.decodeIfPresent(String.self, forKey: .badge),
             disabled: try c.decodeIfPresent(Bool.self, forKey: .disabled) ?? false
         )
@@ -468,6 +492,7 @@ extension HermesPickerOption {
         try c.encode(label, forKey: .label)
         try c.encodeIfPresent(sublabel, forKey: .sublabel)
         try c.encodeIfPresent(systemImage, forKey: .systemImage)
+        try c.encodeIfPresent(imageUrl, forKey: .imageUrl)
         try c.encodeIfPresent(badge, forKey: .badge)
         if disabled { try c.encode(true, forKey: .disabled) }
     }

@@ -79,7 +79,7 @@ for json in "$BATCH"/*.json; do
   base=$(basename "$json" .json)
   thumb="$THUMBS/$base.jpg"
   echo "==> [$base] thumbnail + send..."
-  python3 "$SKILL/scripts/make_thumbnail.py" "$json" "$thumb"
+  python3 "$ROOT/scripts/make_thumbnail.py" "$json" "$thumb"
   compact=$(python3 -c "import json; print(json.dumps(json.load(open('$json')), separators=(',', ':')))")
   out=$(node send_batch_card.mjs "$compact" "$TO" "$HOST/card.json" "$thumb" 2>&1) || true
   echo "$out" >>"$LOG"

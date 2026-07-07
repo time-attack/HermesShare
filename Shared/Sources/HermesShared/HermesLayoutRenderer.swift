@@ -334,6 +334,12 @@ public struct HermesNodeView: View {
         case let .photoCatalog(items, initialExpandedId, confirmLabel):
             HermesPhotoCatalogView(items: items, initialExpandedId: initialExpandedId, confirmLabel: confirmLabel)
 
+        case let .collapsible(id, title, subtitle, imageUrl, badge, initiallyExpanded, child):
+            HermesCollapsibleView(
+                id: id, title: title, subtitle: subtitle, imageUrl: imageUrl,
+                badge: badge, initiallyExpanded: initiallyExpanded, child: child
+            )
+
         case let .unsupported(typeName):
             // Forward-compat surface: the sender used vocabulary this build doesn't know.
             // Per the no-silent-fallback rule this is visible and named, never blank.
@@ -1200,12 +1206,7 @@ struct HermesOptionPickerView: View {
     @ViewBuilder private func optionRow(_ option: HermesPickerOption) -> some View {
         let isSelected = option.id == selectedId
         HStack(spacing: 10) {
-            if let systemImage = option.systemImage {
-                Image(systemName: systemImage)
-                    .font(.system(size: 17, weight: .medium))
-                    .foregroundStyle(isSelected ? accent : .secondary)
-                    .frame(width: 24)
-            }
+            optionLeading(option, isSelected: isSelected)
             VStack(alignment: .leading, spacing: 1) {
                 Text(option.label)
                     .font(.subheadline.weight(isSelected ? .semibold : .regular))
@@ -1242,8 +1243,16 @@ struct HermesOptionPickerView: View {
 
     @ViewBuilder private func gridCell(_ option: HermesPickerOption) -> some View {
         let isSelected = option.id == selectedId
-        VStack(spacing: 3) {
-            if let systemImage = option.systemImage {
+        VStack(spacing: 6) {
+            if let imageUrl = option.imageUrl {
+                HermesRemoteImage(urlString: imageUrl, fallbackSystemImage: option.systemImage ?? "photo")
+                    .frame(width: 56, height: 56)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(isSelected ? accent : Color.clear, lineWidth: 2)
+                    )
+            } else if let systemImage = option.systemImage {
                 Image(systemName: systemImage)
                     .font(.system(size: 18, weight: .medium))
                     .foregroundStyle(isSelected ? accent : .secondary)
@@ -1272,6 +1281,23 @@ struct HermesOptionPickerView: View {
         .onTapGesture { toggle(option) }
         .accessibilityLabel("\(option.label)\(isSelected ? ", selected" : "")")
         .accessibilityAddTraits(option.disabled ? [] : .isButton)
+    }
+
+    @ViewBuilder private func optionLeading(_ option: HermesPickerOption, isSelected: Bool) -> some View {
+        if let imageUrl = option.imageUrl {
+            HermesRemoteImage(urlString: imageUrl, fallbackSystemImage: option.systemImage ?? "photo")
+                .frame(width: 52, height: 52)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(isSelected ? accent : Color(.separator).opacity(0.35), lineWidth: 1)
+                )
+        } else if let systemImage = option.systemImage {
+            Image(systemName: systemImage)
+                .font(.system(size: 17, weight: .medium))
+                .foregroundStyle(isSelected ? accent : .secondary)
+                .frame(width: 24)
+        }
     }
 }
 
@@ -1317,6 +1343,97 @@ struct HermesRemoteImage: View {
         Image(systemName: fallbackSystemImage)
             .font(.system(size: 26, weight: .medium))
             .foregroundStyle(.white.opacity(0.35))
+    }
+}
+
+// MARK: - Collapsible section (generic expand/collapse)
+
+/// Tap-to-expand section with optional leading photo. Stack several in a `vstack` for
+/// multi-section cards where each section can contain any node subtree.
+struct HermesCollapsibleView: View {
+    let id: String
+    let title: String
+    let subtitle: String?
+    let imageUrl: String?
+    let badge: String?
+    let initiallyExpanded: Bool
+    let child: HermesNode
+
+    @State private var isExpanded: Bool
+    @Environment(\.hermesAccent) private var accent
+
+    init(id: String, title: String, subtitle: String?, imageUrl: String?, badge: String?,
+         initiallyExpanded: Bool, child: HermesNode) {
+        self.id = id
+        self.title = title
+        self.subtitle = subtitle
+        self.imageUrl = imageUrl
+        self.badge = badge
+        self.initiallyExpanded = initiallyExpanded
+        self.child = child
+        _isExpanded = State(initialValue: initiallyExpanded)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            header
+            if isExpanded {
+                VStack(alignment: .leading, spacing: 10) {
+                    HermesNodeView(node: child)
+                }
+                .padding(.horizontal, 12)
+                .padding(.bottom, 12)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color(.secondarySystemBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Color(.separator).opacity(0.35), lineWidth: 0.5)
+        )
+        .animation(.snappy(duration: 0.25), value: isExpanded)
+    }
+
+    private var header: some View {
+        Button {
+            withAnimation(.snappy(duration: 0.25)) { isExpanded.toggle() }
+        } label: {
+            HStack(spacing: 10) {
+                if let imageUrl {
+                    HermesRemoteImage(urlString: imageUrl, fallbackSystemImage: "photo")
+                        .frame(width: 48, height: 48)
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .multilineTextAlignment(.leading)
+                    if let subtitle {
+                        Text(subtitle)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.leading)
+                    }
+                }
+                Spacer(minLength: 4)
+                if let badge {
+                    Text(badge)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(accent)
+                }
+                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(title), \(isExpanded ? "expanded" : "collapsed")")
     }
 }
 

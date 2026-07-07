@@ -205,6 +205,12 @@ public indirect enum HermesNode: Codable, Equatable, Sendable {
     /// one card by default; `confirmLabel` adds a per-card commit CTA.
     case photoCatalog(items: [HermesCatalogItem], initialExpandedId: String?, confirmLabel: String?)
 
+    /// A single expandable section: header row (optional photo + title) reveals nested content
+    /// on tap. Stack several in a `vstack` for multi-section cards (itineraries, FAQs, plans).
+    /// Unlike `photoCatalog` (listing accordion), each section can contain any node subtree.
+    case collapsible(id: String, title: String, subtitle: String?, imageUrl: String?,
+                     badge: String?, initiallyExpanded: Bool, child: HermesNode)
+
     // v5 — scene expansion (Step 0 genres 6–10 above). Same doctrine as v4: each is a
     // custom-drawn, state-encoding hero for its genre, never a restyled flat element.
 
@@ -294,15 +300,17 @@ public struct HermesPickerOption: Codable, Equatable, Sendable {
     public var label: String
     public var sublabel: String?
     public var systemImage: String?
+    public var imageUrl: String?         // optional leading photo thumbnail (list/grid rows)
     public var badge: String?            // trailing accent text, e.g. "$42", "7:30 PM", "+15 min"
     public var disabled: Bool
 
     public init(id: String, label: String, sublabel: String? = nil, systemImage: String? = nil,
-                badge: String? = nil, disabled: Bool = false) {
+                imageUrl: String? = nil, badge: String? = nil, disabled: Bool = false) {
         self.id = id
         self.label = label
         self.sublabel = sublabel
         self.systemImage = systemImage
+        self.imageUrl = imageUrl
         self.badge = badge
         self.disabled = disabled
     }

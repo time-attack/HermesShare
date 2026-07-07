@@ -26,6 +26,8 @@ public extension HermesLayout {
         case .scoreBoard: return .scoreboard
         case .eventTicket: return .ticket
         case .mediaList: return .media
+        case .photoCatalog: return .media
+        case .collapsible: return .picker
         case .quickReplyRow: return .poll
         case .vstack(_, _, let children), .hstack(_, _, let children):
             for child in children {

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "title": "App design direction",
+  "subtitle": "HermesShare settings refresh · pick a layout",
+  "accentColorHex": "#0A84FF",
+  "background": { "kind": "plain" },
+  "root": {
+    "type": "vstack",
+    "spacing": 12,
+    "alignment": "leading",
+    "children": [
+      {
+        "type": "text",
+        "text": "Three mock directions with preview thumbnails. Tap to select, then confirm.",
+        "style": { "role": "subheadline", "colorHex": "#8E8E93" }
+      },
+      {
+        "type": "optionPicker",
+        "confirmLabel": "Use this design",
+        "pickerStyle": "grid",
+        "options": [
+          {
+            "id": "glass",
+            "label": "Liquid Glass",
+            "sublabel": "iOS 26 chrome",
+            "imageUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop"
+          },
+          {
+            "id": "editorial",
+            "label": "Editorial",
+            "sublabel": "Serif headlines",
+            "imageUrl": "https://images.unsplash.com/photo-1558655146-364adaf1fcc9?w=400&h=400&fit=crop"
+          },
+          {
+            "id": "dark",
+            "label": "Atmosphere",
+            "sublabel": "Scene-forward",
+            "imageUrl": "https://images.unsplash.com/photo-1550684846-fac571c28966?w=400&h=400&fit=crop"
+          },
+          {
+            "id": "compact",
+            "label": "Compact",
+            "sublabel": "Dense lists",
+            "imageUrl": "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=400&h=400&fit=crop"
+          }
+        ]
+      }
+    ]
+  }
+}

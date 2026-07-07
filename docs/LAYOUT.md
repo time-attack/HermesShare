@@ -188,6 +188,119 @@ Remote image with placeholder/progress states. `aspectRatio`/`cornerRadius` opti
 - A chip tap **immediately** composes and inserts the reply — no confirm step. Only use for
   choices where instant commit is obviously the right behavior.
 
+## Options with pictures (read this before saying "collapsibles aren't supported")
+
+HermesShare **already supports** rich picture-based option cards and collapsible sections.
+Use the node below that matches the interaction — never tell the user to wait for a schema update.
+
+| Goal | Node | Interaction |
+| --- | --- | --- |
+| Pick one option (restaurants, flights, designs, products) with photos | `optionPicker` + `imageUrl` on each option | Tap to highlight → Confirm CTA |
+| Browse hotels/listings with expandable photo cards | `photoCatalog` | Tap card to expand accordion → room gallery → optional Book CTA |
+| Ranked "top N" with artwork per row | `mediaList` | Read-only list with thumbnails |
+| Big hero gallery + detail blocks | `gallery` + `vstack` of `card` nodes | Scroll; no collapse needed |
+| Multi-section plan with tap-to-expand sections | `collapsible` (stack in `vstack`) | Tap header to expand/collapse nested content |
+| Always-visible steps | `timeline` | No collapse — use when everything should stay open |
+
+### `optionPicker` with photos
+
+Same as the standard picker, plus optional `imageUrl` per option (52×52 thumbnail in list style,
+56×56 in grid style). `systemImage` is the fallback when the image fails to load.
+
+```json
+{
+  "type": "optionPicker",
+  "confirmLabel": "Book",
+  "pickerStyle": "list",
+  "options": [
+    {
+      "id": "mizuno",
+      "label": "Okonomiyaki Mizuno",
+      "sublabel": "Michelin Bib · ~20 min wait",
+      "badge": "¥1,400",
+      "imageUrl": "https://example.com/mizuno.jpg"
+    }
+  ]
+}
+```
+
+### `photoCatalog` — collapsible listing cards (hotels, rentals, restaurants)
+
+Full-bleed hero photos with **accordion expand/collapse** (one open at a time). Expanded state
+reveals a horizontal room/photo gallery, amenity tags, detail text, and optional per-item
+confirm button.
+
+```json
+{
+  "type": "photoCatalog",
+  "initialExpandedId": "millennials",
+  "confirmLabel": "Book",
+  "catalogItems": [
+    {
+      "id": "millennials",
+      "heroImageUrl": "https://example.com/hero.jpg",
+      "title": "The Millennials Kyoto",
+      "subtitle": "Nakagyo · ★ 4.4",
+      "priceText": "from $88",
+      "priceUnit": "night",
+      "rooms": [
+        { "id": "pod", "imageUrl": "https://example.com/pod.jpg", "name": "Smart Pod", "price": "$88" }
+      ],
+      "tags": ["Free WiFi", "Smart pods"],
+      "detail": "Capsule-style pods in central Kyoto."
+    }
+  ]
+}
+```
+
+See `Shared/Tests/HermesSharedTests/Fixtures/sent_kyoto_catalog.json` for a complete example.
+
+### `collapsible` — generic expand/collapse sections
+
+For itineraries, FAQs, multi-step plans, or any section that should hide detail until tapped.
+Stack several in a `vstack`. Each section wraps **any** child node (timeline, checklist, nested
+cards, etc.).
+
+```json
+{
+  "type": "collapsible",
+  "sectionId": "osaka",
+  "title": "Day 1–3 · Osaka",
+  "subtitle": "Dotonbori, Namba, USJ",
+  "badge": "3 nights",
+  "initiallyExpanded": true,
+  "imageUrl": "https://example.com/osaka.jpg",
+  "child": {
+    "type": "timeline",
+    "entries": [
+      { "time": "Day 1", "title": "Arrive KIX", "state": "past" }
+    ]
+  }
+}
+```
+
+### `mediaList` — ranked rows with artwork
+
+```json
+{
+  "type": "mediaList",
+  "mediaItems": [
+    {
+      "id": "1",
+      "rank": 1,
+      "imageUrl": "https://example.com/cover.jpg",
+      "title": "Midnight City",
+      "subtitle": "M83",
+      "trailing": "412M",
+      "trailingSub": "streams"
+    }
+  ]
+}
+```
+
+Demo fixtures: `demo_picture_restaurants.json`, `demo_picture_flights.json`,
+`demo_app_designs.json`, `demo_collapsible_trip.json`, `sent_kyoto_catalog.json`.
+
 ## Scene heroes (v4 + v5) — the drawn centerpieces
 
 This guide's node list above is the v1/v2 core. The vocabulary has since grown three
@@ -195,7 +308,9 @@ generations; the AUTHORITATIVE, fully-documented reference (exact JSON per node,
 composition doctrine) is the hermesshare-cards skill's `references/schema.md`. Summary:
 
 - v3 content nodes: `checklist`, `timeline`, `rating`, `table`, `gallery`, `tagRow`, `stat`,
-  `dateBadge`, `person`, `barChart`, `optionPicker`.
+  `dateBadge`, `person`, `barChart`, `optionPicker` (supports `imageUrl` per option).
+- v3+ picture/collapse nodes: `mediaList`, `photoCatalog` (accordion listings),
+  `collapsible` (generic tap-to-expand sections).
 - v4 scene heroes (payload nests under the noted key): `flightBoard` (`board`) — split-flap
   departure board; `platedDish` (`dish`) — procedural plated-dish scene; `gaugeCluster`
   (`gauges`) — cockpit arc gauges. Drawn in `HermesSceneViews.swift`.

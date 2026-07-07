@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "title": "Japan trip — tap to expand",
+  "subtitle": "Osaka · Kyoto · Tokyo · Jul 10–18",
+  "accentColorHex": "#BF5AF2",
+  "background": { "kind": "plain" },
+  "root": {
+    "type": "vstack",
+    "spacing": 10,
+    "alignment": "leading",
+    "children": [
+      {
+        "type": "collapsible",
+        "sectionId": "osaka",
+        "title": "Day 1–3 · Osaka",
+        "subtitle": "Dotonbori, Namba, USJ",
+        "badge": "3 nights",
+        "initiallyExpanded": true,
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Dotonbori_Osaka_Japan.jpg/320px-Dotonbori_Osaka_Japan.jpg",
+        "child": {
+          "type": "vstack",
+          "spacing": 8,
+          "children": [
+            {
+              "type": "timeline",
+              "entries": [
+                { "time": "Day 1", "title": "Arrive KIX → Namba", "subtitle": "Check in The Millennials", "state": "past" },
+                { "time": "Day 2", "title": "Dotonbori food crawl", "subtitle": "Mizuno + Daruma", "state": "current" },
+                { "time": "Day 3", "title": "Universal Studios Japan", "subtitle": "Express pass 9 AM", "state": "future" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "type": "collapsible",
+        "sectionId": "kyoto",
+        "title": "Day 4–6 · Kyoto",
+        "subtitle": "Fushimi, Gion, Arashiyama",
+        "badge": "2 nights",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Kinkaku-ji_2015.jpg/320px-Kinkaku-ji_2015.jpg",
+        "child": {
+          "type": "vstack",
+          "spacing": 8,
+          "children": [
+            {
+              "type": "checklist",
+              "items": [
+                { "text": "Book Hiiragiya Ryokan", "state": "checked" },
+                { "text": "Fushimi Inari sunrise hike", "state": "unchecked" },
+                { "text": "Tea ceremony in Gion", "state": "unchecked" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "type": "collapsible",
+        "sectionId": "tokyo",
+        "title": "Day 7–9 · Tokyo",
+        "subtitle": "Shibuya, teamLab, flight home",
+        "badge": "2 nights",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Shibuya_Crossing_2018.jpg/320px-Shibuya_Crossing_2018.jpg",
+        "child": {
+          "type": "vstack",
+          "spacing": 8,
+          "children": [
+            {
+              "type": "keyValueRow",
+              "key": "Hotel",
+              "value": "Shibuya Stream Excel"
+            },
+            {
+              "type": "keyValueRow",
+              "key": "Flight",
+              "value": "Zipair NRT → SJC · Jul 18"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "actions": [
+    {
+      "id": "share-itinerary",
+      "label": "Share full itinerary PDF",
+      "systemImage": "square.and.arrow.up",
+      "deepLinkURL": "hermesshare://action?id=share-itinerary"
+    }
+  ]
+}

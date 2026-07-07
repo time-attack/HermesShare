@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "title": "Which flight works?",
+  "subtitle": "SFO → TPE · Jul 12 · 1 checked bag",
+  "accentColorHex": "#00875A",
+  "background": { "kind": "plain" },
+  "root": {
+    "type": "vstack",
+    "spacing": 12,
+    "alignment": "leading",
+    "children": [
+      {
+        "type": "text",
+        "text": "Compare fares with airline imagery. Select one to hold the fare.",
+        "style": { "role": "subheadline", "colorHex": "#8E8E93" }
+      },
+      {
+        "type": "optionPicker",
+        "confirmLabel": "Hold fare",
+        "pickerStyle": "list",
+        "options": [
+          {
+            "id": "eva-837",
+            "label": "EVA Air 837",
+            "sublabel": "11:30 PM depart · nonstop · 13h 20m",
+            "badge": "$892",
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Eva_Air_Boeing_777-300ER_B-16722.jpg/320px-Eva_Air_Boeing_777-300ER_B-16722.jpg"
+          },
+          {
+            "id": "ci-3",
+            "label": "China Airlines 3",
+            "sublabel": "1:05 AM depart · nonstop · 13h 45m",
+            "badge": "$847",
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/China_Airlines_Boeing_777-300ER_B-18007.jpg/320px-China_Airlines_Boeing_777-300ER_B-18007.jpg"
+          },
+          {
+            "id": "ua-871",
+            "label": "United 871",
+            "sublabel": "10:55 AM depart · 1 stop HND · 16h 10m",
+            "badge": "$712",
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/United_Airlines_Boeing_777-200ER_N78003.jpg/320px-United_Airlines_Boeing_777-200ER_N78003.jpg"
+          }
+        ]
+      }
+    ]
+  }
+}

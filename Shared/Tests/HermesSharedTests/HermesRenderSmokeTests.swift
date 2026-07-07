@@ -222,6 +222,16 @@ final class HermesRenderSmokeTests: XCTestCase {
                           size: CGSize(width: 390, height: 1400), settle: 4.0)
     }
 
+    func testPicturePickerRestaurantsRenders() throws {
+        _ = try renderPNG(layout: try loadFixture("demo_picture_restaurants"), name: "demo_picture_restaurants",
+                          size: CGSize(width: 390, height: 720), settle: 3.0)
+    }
+
+    func testCollapsibleTripRenders() throws {
+        _ = try renderPNG(layout: try loadFixture("demo_collapsible_trip"), name: "demo_collapsible_trip",
+                          size: CGSize(width: 390, height: 900), settle: 2.0)
+    }
+
     /// Collapsed-only variant (no pre-expanded card) — proves the full-bleed collapsed hero
     /// stack renders with price pills and scrim, no drawer.
     func testKyotoCatalogCollapsedRenders() throws {

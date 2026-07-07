@@ -21,7 +21,7 @@ W, H = 600, 400
 SCENE_TYPES = (
     "flightBoard", "gaugeCluster", "seatChart", "optionPicker", "platedDish",
     "skyScene", "journeyArc", "sparkline", "scoreBoard", "eventTicket",
-    "mediaList", "quickReplyRow",
+    "mediaList", "quickReplyRow", "photoCatalog", "collapsible",
 )
 
 
@@ -163,6 +163,8 @@ DRAWERS = {
     "eventTicket": draw_ticket,
     "mediaList": draw_media,
     "quickReplyRow": draw_poll,
+    "photoCatalog": draw_media,
+    "collapsible": draw_picker,
 }
 
 
