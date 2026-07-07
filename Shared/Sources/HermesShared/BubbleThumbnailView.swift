@@ -14,6 +14,43 @@ public extension HermesLayout {
         Self.findBubbleThumbnailKind(in: root)
     }
 
+    /// First photo URL in the layout tree — used for rich bubble previews (caption carries text).
+    var bubbleHeroImageUrl: String? {
+        Self.findBubbleHeroImageUrl(in: root)
+    }
+
+    private static func findBubbleHeroImageUrl(in node: HermesNode) -> String? {
+        switch node {
+        case let .photoCatalog(items, initialExpandedId, _):
+            if let id = initialExpandedId,
+               let item = items.first(where: { $0.id == id }),
+               let url = item.heroImageUrl { return url }
+            if let url = items.compactMap(\.heroImageUrl).first { return url }
+            if let url = items.compactMap({ $0.rooms.compactMap(\.imageUrl).first }).first { return url }
+        case let .optionPicker(options, _, _, _):
+            if let url = options.compactMap(\.imageUrl).first { return url }
+        case let .mediaList(items):
+            if let url = items.compactMap(\.imageUrl).first { return url }
+        case let .gallery(urls, _, _):
+            if let url = urls.first { return url }
+        case let .image(url, _, _):
+            return url
+        case let .person(_, _, imageUrl, _):
+            return imageUrl
+        case let .collapsible(_, _, _, imageUrl, _, _, _):
+            return imageUrl
+        case let .vstack(_, _, children), let .hstack(_, _, children):
+            for child in children {
+                if let url = findBubbleHeroImageUrl(in: child) { return url }
+            }
+        case let .card(_, _, _, child):
+            return findBubbleHeroImageUrl(in: child)
+        default:
+            break
+        }
+        return nil
+    }
+
     private static func findBubbleThumbnailKind(in node: HermesNode) -> BubbleThumbnailKind {
         switch node {
         case .flightBoard: return .flight
@@ -59,17 +96,67 @@ public struct BubbleThumbnailView: View {
 
     public var body: some View {
         ZStack {
-            Color(red: 19 / 255, green: 21 / 255, blue: 26 / 255)
-            RadialGradient(
-                colors: [accent.opacity(0.32), .clear],
-                center: UnitPoint(x: 0.5, y: 0.42),
-                startRadius: 8,
-                endRadius: 150
-            )
-            graphic
+            if let heroUrl = layout.bubbleHeroImageUrl, let url = URL(string: heroUrl) {
+                photoHero(url: url)
+            } else {
+                illustratedBackground
+            }
         }
         .frame(width: 300, height: 200)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+
+    private var illustratedBackground: some View {
+        ZStack {
+            atmosphereGradient
+            graphic
+        }
+    }
+
+    private var atmosphereGradient: some View {
+        ZStack {
+            Color(red: 19 / 255, green: 21 / 255, blue: 26 / 255)
+            if layout.background?.kind == .atmosphere,
+               let hex = layout.background?.colorsHex?.first,
+               let tint = Color(hermesHex: hex) {
+                LinearGradient(
+                    colors: [tint.opacity(0.45), Color(red: 19 / 255, green: 21 / 255, blue: 26 / 255)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
+            RadialGradient(
+                colors: [accent.opacity(0.28), .clear],
+                center: UnitPoint(x: 0.5, y: 0.38),
+                startRadius: 8,
+                endRadius: 140
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func photoHero(url: URL) -> some View {
+        AsyncImage(url: url) { phase in
+            switch phase {
+            case let .success(image):
+                image
+                    .resizable()
+                    .scaledToFill()
+            default:
+                atmosphereGradient
+            }
+        }
+        .overlay {
+            LinearGradient(
+                colors: [.black.opacity(0.35), .clear, .black.opacity(0.55)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(accent.opacity(0.35), lineWidth: 2)
+        }
     }
 
     @ViewBuilder
