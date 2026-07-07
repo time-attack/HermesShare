@@ -87,12 +87,6 @@
             "price": "$228"
           }
         ],
-      "tags": [
-          "Onsen",
-          "Free breakfast",
-          "Garden",
-          "Shuttle"
-        ],
         "amenities": [
           { "label": "Onsen", "systemImage": "bathtub.fill" },
           { "label": "Free breakfast", "systemImage": "cup.and.saucer.fill" },

@@ -18,7 +18,7 @@ import UIKit
 /// and hosted can silently never arrive). Any screenshot or log pull now says which
 /// build produced it. Bump the date/tag whenever behavior changes.
 public enum HermesBuildInfo {
-    public static let stamp = "2026-07-07.9 catalog-layout-fix"
+    public static let stamp = "2026-07-08.1 permanent-url-cache"
 }
 
 public struct HermesCardFailureView: View {

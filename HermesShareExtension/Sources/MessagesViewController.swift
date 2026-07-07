@@ -81,6 +81,10 @@ final class MessagesViewController: MSMessagesAppViewController {
         // at the card that was open BEFORE the tapped (Photon-delivered, never-cached)
         // message existed. willResignActive is the only place taps go stale.
         presentGeneration += 1
+        // Cache while the URL is still present — before iOS strips it on warm re-taps.
+        if let selected = conversation.selectedMessage, let layout = Self.layout(from: selected) {
+            HermesLayoutSessionCache.store(layout: layout, for: selected.session)
+        }
         debugLog("EVENT willBecomeActive gen=\(presentGeneration) build=\(HermesBuildInfo.stamp) — lastTappedSession=\(HermesLayoutSessionCache.key(for: lastTappedMessage?.session) ?? "nil"), selectedMessage.url=\(conversation.selectedMessage?.url?.absoluteString.prefix(60) ?? "nil"), selectedSession=\(HermesLayoutSessionCache.key(for: conversation.selectedMessage?.session) ?? "nil")")
         let decision = router.willBecomeActive(selected: snapshot(of: conversation.selectedMessage))
         apply(decision, event: "willBecomeActive", conversation: conversation,
@@ -117,6 +121,9 @@ final class MessagesViewController: MSMessagesAppViewController {
         super.didSelect(message, conversation: conversation)
         lastTappedMessage = message
         presentGeneration += 1
+        if let layout = Self.layout(from: message) {
+            HermesLayoutSessionCache.store(layout: layout, for: message.session)
+        }
         debugLog("EVENT didSelect gen=\(presentGeneration) — message.url=\(message.url?.absoluteString.prefix(60) ?? "nil"), tappedSession=\(HermesLayoutSessionCache.key(for: message.session) ?? "nil"), selectedSession=\(HermesLayoutSessionCache.key(for: conversation.selectedMessage?.session) ?? "nil")")
         let decision = router.didSelect(tapped: snapshot(of: message)!,
                                         selected: snapshot(of: conversation.selectedMessage))
