@@ -377,6 +377,47 @@ public struct HermesPlatedDish: Codable, Equatable, Sendable {
     }
 }
 
+/// One amenity tile in a `photoCatalog` drawer — icon-first, short label underneath.
+public struct HermesCatalogAmenity: Codable, Equatable, Sendable {
+    public var label: String
+    public var systemImage: String
+
+    public init(label: String, systemImage: String) {
+        self.label = label
+        self.systemImage = systemImage
+    }
+
+    /// Maps legacy plain-text tags to icon tiles when authors omit `systemImage`.
+    public static func inferred(from tag: String) -> HermesCatalogAmenity {
+        let key = tag.lowercased()
+        let icon: String
+        switch true {
+        case key.contains("onsen"), key.contains("bath"), key.contains("spa"): icon = "bathtub.fill"
+        case key.contains("breakfast"), key.contains("coffee"): icon = "cup.and.saucer.fill"
+        case key.contains("garden"), key.contains("courtyard"), key.contains("terrace"): icon = "leaf.fill"
+        case key.contains("shuttle"), key.contains("bus"), key.contains("transfer"): icon = "bus.fill"
+        case key.contains("wifi"), key.contains("wi-fi"): icon = "wifi"
+        case key.contains("gym"), key.contains("fitness"): icon = "figure.run"
+        case key.contains("restaurant"), key.contains("dining"): icon = "fork.knife"
+        case key.contains("bar"), key.contains("cocktail"): icon = "wineglass.fill"
+        case key.contains("pool"), key.contains("swim"): icon = "figure.pool.swim"
+        case key.contains("parking"), key.contains("garage"): icon = "parkingsign.circle.fill"
+        case key.contains("pet"), key.contains("dog"): icon = "pawprint.fill"
+        case key.contains("lounge"), key.contains("sofa"): icon = "sofa.fill"
+        case key.contains("check-in"), key.contains("24h"), key.contains("24 h"): icon = "clock.fill"
+        case key.contains("view"), key.contains("skyline"): icon = "building.2.fill"
+        case key.contains("tea"): icon = "teapot.fill"
+        case key.contains("machiya"), key.contains("ryokan"): icon = "house.fill"
+        case key.contains("pod"), key.contains("bed"): icon = "bed.double.fill"
+        case key.contains("kitchen"): icon = "refrigerator.fill"
+        case key.contains("laundry"): icon = "washer.fill"
+        case key.contains("ac"), key.contains("air"): icon = "snowflake"
+        default: icon = "checkmark.seal.fill"
+        }
+        return HermesCatalogAmenity(label: tag, systemImage: icon)
+    }
+}
+
 /// One photo tile inside a `photoCatalog` card — a room, a table, a unit. Tapping it promotes
 /// its photo to the card's hero and swaps the price pill to `price`.
 public struct HermesCatalogRoom: Codable, Equatable, Sendable {
@@ -403,13 +444,15 @@ public struct HermesCatalogItem: Codable, Equatable, Sendable {
     public var priceText: String?       // collapsed pill, e.g. "from $88"
     public var priceUnit: String?       // "night"
     public var rooms: [HermesCatalogRoom]  // the room gallery revealed on expand
-    public var tags: [String]?          // amenity chips: ["Onsen", "Free WiFi", "Breakfast"]
+    public var amenities: [HermesCatalogAmenity]?  // icon tiles in the expanded drawer (preferred)
+    public var tags: [String]?          // legacy text tags — auto-mapped to icons when amenities omitted
     public var detail: String?          // a short description line
     public var fallbackSystemImage: String?  // placeholder glyph; default "bed.double.fill"
 
     public init(id: String, heroImageUrl: String? = nil, title: String, subtitle: String? = nil,
                 priceText: String? = nil, priceUnit: String? = nil, rooms: [HermesCatalogRoom] = [],
-                tags: [String]? = nil, detail: String? = nil, fallbackSystemImage: String? = nil) {
+                amenities: [HermesCatalogAmenity]? = nil, tags: [String]? = nil, detail: String? = nil,
+                fallbackSystemImage: String? = nil) {
         self.id = id
         self.heroImageUrl = heroImageUrl
         self.title = title
@@ -417,9 +460,16 @@ public struct HermesCatalogItem: Codable, Equatable, Sendable {
         self.priceText = priceText
         self.priceUnit = priceUnit
         self.rooms = rooms
+        self.amenities = amenities
         self.tags = tags
         self.detail = detail
         self.fallbackSystemImage = fallbackSystemImage
+    }
+
+    /// Resolved amenity tiles: explicit `amenities` win; plain `tags` are icon-mapped.
+    public var resolvedAmenities: [HermesCatalogAmenity] {
+        if let amenities, !amenities.isEmpty { return amenities }
+        return tags?.map { HermesCatalogAmenity.inferred(from: $0) } ?? []
     }
 }
 

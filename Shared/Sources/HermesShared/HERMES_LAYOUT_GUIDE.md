@@ -227,8 +227,11 @@ Same as the standard picker, plus optional `imageUrl` per option (52×52 thumbna
 ### `photoCatalog` — collapsible listing cards (hotels, rentals, restaurants)
 
 Full-bleed hero photos with **accordion expand/collapse** (one open at a time). Expanded state
-reveals a horizontal room/photo gallery, amenity tags, detail text, and optional per-item
+reveals a horizontal room/photo gallery, **icon amenity tiles**, detail text, and optional per-item
 confirm button.
+
+**Amenity design:** use `amenities` with SF Symbol icons — large 48pt icon tiles with short
+labels underneath. Never plain text capsule badges.
 
 ```json
 {
@@ -246,7 +249,11 @@ confirm button.
       "rooms": [
         { "id": "pod", "imageUrl": "https://example.com/pod.jpg", "name": "Smart Pod", "price": "$88" }
       ],
-      "tags": ["Free WiFi", "Smart pods"],
+      "amenities": [
+        { "label": "Free WiFi", "systemImage": "wifi" },
+        { "label": "Smart pods", "systemImage": "bed.double.fill" },
+        { "label": "Lounge", "systemImage": "sofa.fill" }
+      ],
       "detail": "Capsule-style pods in central Kyoto."
     }
   ]

@@ -87,11 +87,17 @@
             "price": "$228"
           }
         ],
-        "tags": [
+      "tags": [
           "Onsen",
           "Free breakfast",
           "Garden",
           "Shuttle"
+        ],
+        "amenities": [
+          { "label": "Onsen", "systemImage": "bathtub.fill" },
+          { "label": "Free breakfast", "systemImage": "cup.and.saucer.fill" },
+          { "label": "Garden", "systemImage": "leaf.fill" },
+          { "label": "Shuttle", "systemImage": "bus.fill" }
         ],
         "detail": "Tatami rooms around a courtyard garden and a communal bath, five minutes from Kyoto Station.",
         "fallbackSystemImage": "bed.double.fill"

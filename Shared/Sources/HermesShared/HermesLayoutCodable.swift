@@ -613,7 +613,7 @@ extension HermesCatalogRoom {
 
 extension HermesCatalogItem {
     private enum CodingKeys: String, CodingKey {
-        case id, heroImageUrl, title, subtitle, priceText, priceUnit, rooms, tags, detail, fallbackSystemImage
+        case id, heroImageUrl, title, subtitle, priceText, priceUnit, rooms, amenities, tags, detail, fallbackSystemImage
     }
 
     public init(from decoder: Decoder) throws {
@@ -626,6 +626,7 @@ extension HermesCatalogItem {
             priceText: try c.decodeIfPresent(String.self, forKey: .priceText),
             priceUnit: try c.decodeIfPresent(String.self, forKey: .priceUnit),
             rooms: try c.decodeIfPresent([HermesCatalogRoom].self, forKey: .rooms) ?? [],
+            amenities: try c.decodeIfPresent([HermesCatalogAmenity].self, forKey: .amenities),
             tags: try c.decodeIfPresent([String].self, forKey: .tags),
             detail: try c.decodeIfPresent(String.self, forKey: .detail),
             fallbackSystemImage: try c.decodeIfPresent(String.self, forKey: .fallbackSystemImage)
@@ -641,9 +642,28 @@ extension HermesCatalogItem {
         try c.encodeIfPresent(priceText, forKey: .priceText)
         try c.encodeIfPresent(priceUnit, forKey: .priceUnit)
         if !rooms.isEmpty { try c.encode(rooms, forKey: .rooms) }
+        try c.encodeIfPresent(amenities, forKey: .amenities)
         try c.encodeIfPresent(tags, forKey: .tags)
         try c.encodeIfPresent(detail, forKey: .detail)
         try c.encodeIfPresent(fallbackSystemImage, forKey: .fallbackSystemImage)
+    }
+}
+
+extension HermesCatalogAmenity {
+    private enum CodingKeys: String, CodingKey { case label, systemImage }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            label: try c.decode(String.self, forKey: .label),
+            systemImage: try c.decode(String.self, forKey: .systemImage)
+        )
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(label, forKey: .label)
+        try c.encode(systemImage, forKey: .systemImage)
     }
 }
 

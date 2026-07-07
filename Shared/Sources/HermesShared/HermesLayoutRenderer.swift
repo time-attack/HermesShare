@@ -1604,8 +1604,8 @@ struct HermesPhotoCatalogView: View {
                 roomStrip(item, selected: selected)
             }
 
-            if let tags = item.tags, !tags.isEmpty {
-                amenityChips(tags)
+            if !item.resolvedAmenities.isEmpty {
+                amenityIconTiles(item.resolvedAmenities)
             }
 
             if let detail = item.detail {
@@ -1676,23 +1676,49 @@ struct HermesPhotoCatalogView: View {
         }
     }
 
-    @ViewBuilder private func amenityChips(_ tags: [String]) -> some View {
-        let shown = Array(tags.prefix(4))
-        let overflow = tags.count - shown.count
-        HermesFlowLayout(spacing: 6, rowSpacing: 6) {
-            ForEach(Array(shown.enumerated()), id: \.offset) { _, tag in
-                Text(tag)
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.white.opacity(0.85))
-                    .padding(.horizontal, 9).padding(.vertical, 4)
-                    .background(Capsule().fill(Color.white.opacity(0.08)))
+    @ViewBuilder private func amenityIconTiles(_ amenities: [HermesCatalogAmenity]) -> some View {
+        let shown = Array(amenities.prefix(4))
+        let overflow = amenities.count - shown.count
+        HStack(spacing: 10) {
+            ForEach(Array(shown.enumerated()), id: \.offset) { _, amenity in
+                VStack(spacing: 6) {
+                    Image(systemName: amenity.systemImage)
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundStyle(accent)
+                        .frame(width: 48, height: 48)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(accent.opacity(0.14))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(accent.opacity(0.25), lineWidth: 1)
+                        )
+                    Text(amenity.label)
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.78))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
+                        .frame(maxWidth: .infinity)
+                }
+                .frame(maxWidth: .infinity)
             }
             if overflow > 0 {
-                Text("+\(overflow)")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(accent)
-                    .padding(.horizontal, 9).padding(.vertical, 4)
-                    .background(Capsule().fill(accent.opacity(0.15)))
+                VStack(spacing: 6) {
+                    Text("+\(overflow)")
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(accent)
+                        .frame(width: 48, height: 48)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(accent.opacity(0.10))
+                        )
+                    Text("more")
+                        .font(.caption2)
+                        .foregroundStyle(.white.opacity(0.5))
+                }
+                .frame(maxWidth: .infinity)
             }
         }
     }
