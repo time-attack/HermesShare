@@ -18,7 +18,9 @@ import UIKit
 /// and hosted can silently never arrive). Any screenshot or log pull now says which
 /// build produced it. Bump the date/tag whenever behavior changes.
 public enum HermesBuildInfo {
-    public static let stamp = "2026-07-08.1 permanent-url-cache"
+    /// Bump this by hand every build you install, or the debug log lies about which binary is
+    /// running — a stale stamp already caused one wrong diagnosis ("device is 20 days behind").
+    public static let stamp = "2026-07-28.2 transcript-live-layout"
 }
 
 public struct HermesCardFailureView: View {

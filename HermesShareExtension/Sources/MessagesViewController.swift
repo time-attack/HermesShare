@@ -137,6 +137,18 @@ final class MessagesViewController: MSMessagesAppViewController {
         }
     }
 
+    /// Sizes the in-transcript bubble for MSMessageLiveLayout messages (every card Linq sends is
+    /// a live layout). Apple's default implementation returns `size` unchanged — i.e. the MAXIMUM
+    /// Messages will grant — which is why the bubble rendered as a full-height copy of the app.
+    /// Only ever called on `.transcript` instances, so no style branch is needed. Must be <= size.
+    /// https://developer.apple.com/documentation/messages/msmessagelivelayout
+    override func contentSizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: min(size.width, Self.transcriptPreviewSize.width),
+               height: min(size.height, Self.transcriptPreviewSize.height))
+    }
+
+    static let transcriptPreviewSize = CGSize(width: 300, height: 200)
+
     override func didReceive(_ message: MSMessage, conversation: MSConversation) {
         super.didReceive(message, conversation: conversation)
         // Cache incoming cards the moment they arrive (while their URL is still present),
@@ -305,6 +317,19 @@ final class MessagesViewController: MSMessagesAppViewController {
     }
 
     private func showRenderer(layout: HermesLayout, style: MSMessagesAppPresentationStyle, conversation: MSConversation, sourceSession: MSSession?) {
+        // A live-layout message makes iOS run this controller INSIDE the transcript bubble with
+        // style == .transcript. Falling through to the code below drew the whole scrolling card
+        // (plus its pinned CTA bar) inline, which is what read as "the entire app as a thumbnail".
+        // didSelect is never delivered to a .transcript instance, so tap-to-expand has to live on
+        // the view itself — requesting .expanded here spawns a fresh full-size instance.
+        // https://developer.apple.com/documentation/messages/msmessagesappviewcontroller/didselect(_:conversation:)
+        if style == .transcript {
+            debugLog("RENDER transcript preview — session=\(HermesLayoutSessionCache.key(for: sourceSession) ?? "nil") title=\(layout.title ?? "nil")")
+            let preview = TranscriptCardPreview(layout: layout)
+                .onTapGesture { [weak self] in self?.requestPresentationStyle(.expanded) }
+            embed(UIHostingController(rootView: AnyView(preview)))
+            return
+        }
         let presentation: HermesPresentation = (style == .expanded) ? .expanded : .compact
         // The primary CTA (layout.actions) must always be visible without scrolling. Use
         // `.safeAreaInset(edge: .bottom)` — the standard SwiftUI idiom for "pinned bar under
@@ -619,6 +644,42 @@ private struct DebugComposeGallery: View {
 
 /// Renders a small snapshot of the card for the MSMessageTemplateLayout image slot, so the
 /// in-transcript bubble shows a native preview even before the message is tapped open.
+/// The in-bubble view for a live-layout card. Deliberately NOT a bare `BubbleThumbnailView`:
+/// that is graphic-only because the template layout supplies caption/subcaption chrome around it,
+/// but a live layout replaces the entire bubble — nothing else draws the title. Worse, layouts with
+/// no scene node resolve to `GenericGraphic`, which is a 1x1 clear pixel, so a bare thumbnail is a
+/// blank rectangle. Keep the art as a backdrop and put the text on top.
+private struct TranscriptCardPreview: View {
+    let layout: HermesLayout
+
+    private var accent: Color { Color(hermesHex: layout.accentColorHex) ?? .accentColor }
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            BubbleThumbnailView(layout: layout)
+            LinearGradient(colors: [.clear, .black.opacity(0.8)], startPoint: .center, endPoint: .bottom)
+            VStack(alignment: .leading, spacing: 3) {
+                if let title = layout.title {
+                    Text(title).font(.headline).fontWeight(.semibold).foregroundStyle(.white)
+                }
+                if let subtitle = layout.subtitle {
+                    Text(subtitle).font(.caption).foregroundStyle(.white.opacity(0.7)).lineLimit(2)
+                }
+                Text("Tap to open").font(.caption2).fontWeight(.bold).foregroundStyle(accent)
+                    .padding(.top, 2)
+            }
+            .padding(14)
+        }
+        // Fill whatever the bubble was granted rather than pinning to 300x200: contentSizeThatFits
+        // clamps to <= the offered size, so on a narrower transcript a fixed frame would overflow.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        // The gradient and text leave transparent regions; without an explicit content shape the
+        // tap-to-expand gesture only lands on opaque pixels — which is the bug being fixed.
+        .contentShape(Rectangle())
+    }
+}
+
 enum CardThumbnailRenderer {
     @MainActor
     static func image(for layout: HermesLayout) -> UIImage? {
