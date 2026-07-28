@@ -129,6 +129,12 @@ final class MessagesViewController: MSMessagesAppViewController {
                                         selected: snapshot(of: conversation.selectedMessage))
         apply(decision, event: "didSelect", conversation: conversation,
               style: presentationStyle, tappedMessage: message)
+        // iOS launches the extension .compact on a bubble tap and never expands by itself, so the
+        // card only appeared after a manual swipe up. Only .expanded draws the full renderer (see
+        // the presentation mapping in presentContent), so ask for it here.
+        if presentationStyle != .expanded {
+            requestPresentationStyle(.expanded)
+        }
     }
 
     override func didReceive(_ message: MSMessage, conversation: MSConversation) {
@@ -390,7 +396,10 @@ final class MessagesViewController: MSMessagesAppViewController {
 
         let template = MSMessageTemplateLayout()
         let caption = layout.title ?? "HermesShare"
-        let thumb = CardThumbnailRenderer.image(for: layout)
+        // A .generic layout (no scene node — e.g. an action reply) has no graphic to draw, and
+        // GenericGraphic is a 1x1 clear pixel, so the thumbnail would be an empty tinted box that
+        // replaces the rendered card in the transcript. No image = a tidy caption/subcaption bubble.
+        let thumb = layout.bubbleThumbnailKind == .generic ? nil : CardThumbnailRenderer.image(for: layout)
         template.image = thumb
         if thumb != nil {
             // Real labels live in caption/subcaption. imageTitle is required when image is set
