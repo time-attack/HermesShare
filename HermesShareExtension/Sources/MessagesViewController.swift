@@ -453,6 +453,12 @@ final class MessagesViewController: MSMessagesAppViewController {
             template.caption = caption
             template.subcaption = layout.subtitle
         }
+        // NOTE: an MSMessageLiveLayout here is what makes iOS keep MSMessage.url in the local
+        // archive (see the chat.db diff below), BUT referencing that class made the extension fail
+        // to load on iOS 26 — grey sheet, and not one line of debugLog, i.e. dyld killed it before
+        // any of our code ran. So the payload rides in summaryText instead (persisted as `ldtext`,
+        // which chat.db keeps for SENT messages), and the layout stays a plain template.
+        //
         // MSMessageLiveLayout, NOT the bare template — this is what makes a reply READABLE.
         // Structural diff of chat.db between a GamePigeon move and a HermesShare reply, both
         // is_from_me=1 on the same device: GamePigeon's archive carries `URL` (an NSURL),
@@ -466,8 +472,30 @@ final class MessagesViewController: MSMessagesAppViewController {
         // NOTE: outbound CARDS deliberately stay plain template layouts (Linq "interactive": false)
         // so the system opens them on tap and layout.image_url previews attach — we never need to
         // read our own card back. Only replies need the URL to survive.
-        message.layout = MSMessageLiveLayout(alternateLayout: template)
-        message.summaryText = layout.title ?? "HermesShare card"
+        message.layout = template
+        // Structural diff of two is_from_me=1 rows in the same chat.db: a GamePigeon move carries
+        // `URL` (an NSURL), `appid` and `liveLayoutInfo`; a HermesShare reply carried only
+        // layoutClass/captions/thumbnail and NO `URL` key. iOS keeps MSMessage.url in the local
+        // archive for a SENT message only when the balloon is a live layout — a live bubble is
+        // re-rendered by the extension on every transcript draw so its payload must survive, while
+        // a template bubble is fully described by caption + image. RECEIVED messages keep the URL
+        // either way, which is why every earlier decode worked and hid this.
+        // Since we cannot use a live layout (it breaks extension loading — see above), the
+        // submission travels in summaryText, which persists as `ldtext`. summaryText is shown in
+        // notification previews and conversation lists, never in the bubble, so the token is out of
+        // the way. This is the channel OpenPigeon reads an 8-Ball move from, minus the URL.
+        // ponytail: base64url in summaryText. If a payload ever outgrows what summaryText will
+        // hold, move to a live layout (needs the load failure solved) or POST it out of band.
+        if let submission = layout.submission,
+           let json = try? JSONEncoder().encode(submission) {
+            let token = json.base64EncodedString()
+                .replacingOccurrences(of: "+", with: "-")
+                .replacingOccurrences(of: "/", with: "_")
+                .replacingOccurrences(of: "=", with: "")
+            message.summaryText = "\(layout.title ?? "HermesShare") \u{2E22}hs:\(token)\u{2E23}"
+        } else {
+            message.summaryText = layout.title ?? "HermesShare card"
+        }
         // Cache at compose time: if this bubble is later selected with a nil url (see
         // presentContent), the renderer can recover the layout from the session cache.
         HermesLayoutSessionCache.store(layout: layout, for: session)

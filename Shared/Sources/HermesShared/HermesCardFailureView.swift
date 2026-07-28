@@ -20,7 +20,7 @@ import UIKit
 public enum HermesBuildInfo {
     /// Bump this by hand every build you install, or the debug log lies about which binary is
     /// running — a stale stamp already caused one wrong diagnosis ("device is 20 days behind").
-    public static let stamp = "2026-07-28.6 live-reply"
+    public static let stamp = "2026-07-28.7 summary-token"
 }
 
 public struct HermesCardFailureView: View {
