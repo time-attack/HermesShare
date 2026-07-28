@@ -18,6 +18,11 @@ public struct HermesLayout: Codable, Equatable, Sendable {
     public var background: HermesBackground?
     public var root: HermesNode
     public var actions: [HermesAction]?          // tappable actions the card can trigger (deep-link back to Hermes)
+    public var submission: HermesSubmission?     // set on a REPLY layout only — the structured form answer
+    /// Agent-minted correlation token for a form card, echoed verbatim into the reply's
+    /// `submission.formId`. OPAQUE: the agent encodes its own context in it
+    /// (e.g. "checkin:UA2850:GSPE2T:7c3f91"). The device never parses or interprets it.
+    public var formId: String?
 
     public init(
         version: Int = 1,
@@ -26,7 +31,9 @@ public struct HermesLayout: Codable, Equatable, Sendable {
         accentColorHex: String? = nil,
         background: HermesBackground? = nil,
         root: HermesNode,
-        actions: [HermesAction]? = nil
+        actions: [HermesAction]? = nil,
+        submission: HermesSubmission? = nil,
+        formId: String? = nil
     ) {
         self.version = version
         self.title = title
@@ -35,6 +42,37 @@ public struct HermesLayout: Codable, Equatable, Sendable {
         self.background = background
         self.root = root
         self.actions = actions
+        self.submission = submission
+        self.formId = formId
+    }
+}
+
+/// The machine-readable answer a form card sends back — one payload per submit, carrying field
+/// IDENTITY (not a human label a receiving agent has to string-match). Purely ADDITIVE: the
+/// reply layout still has its "✓ <label>" title and visible body, so older readers and the
+/// transcript bubble see exactly what they saw before.
+public struct HermesSubmission: Codable, Equatable, Sendable {
+    public let protocolVersion: Int         // wire key "protocol" — always 2
+    public let formId: String?              // echoed verbatim from the card; opaque correlation token
+    public let actionId: String             // the layout action the user tapped
+    /// fieldId -> selected option ids (raw ids, never labels). ALWAYS an array, even for a
+    /// single-select field ("seat": ["23D"]), so a reader has one parse path per field and
+    /// multi-select stays additive. Presence is normative:
+    ///   • unanswered with no prefill → the key is OMITTED (absent means "not answered")
+    ///   • deliberately emptied multi-select → present as []
+    ///   • `null` never appears
+    public let values: [String: [String]]
+
+    private enum CodingKeys: String, CodingKey {
+        case protocolVersion = "protocol"   // `protocol` is a Swift keyword
+        case formId, actionId, values
+    }
+
+    public init(protocolVersion: Int = 2, formId: String? = nil, actionId: String, values: [String: [String]]) {
+        self.protocolVersion = protocolVersion
+        self.formId = formId
+        self.actionId = actionId
+        self.values = values
     }
 }
 
@@ -147,8 +185,13 @@ public indirect enum HermesNode: Codable, Equatable, Sendable {
     case mapPreview(latitude: Double, longitude: Double, label: String?)  // static map snapshot, no live MapKit session
     case image(url: String, aspectRatio: Double?, cornerRadius: CGFloat?)
     case card(padding: CGFloat, cornerRadius: CGFloat, backgroundHex: String?, child: HermesNode)
-    case seatChart(rows: [HermesSeatRow], selectedSeatId: String?)   // interactive picker: tap selects locally, a separate primary CTA commits
-    case quickReplyRow(options: [HermesQuickReplyOption])            // single-tap chips: tapping immediately composes+inserts a reply
+    // `fieldId` (optional, on the three input cases below) turns a control into a FORM INPUT:
+    // it writes to the card's shared HermesFormState, sends NOTHING on its own, and renders NO
+    // confirm button — the card's single submit bar is the only thing that sends, and it carries
+    // every field's value in one `HermesSubmission`. Omit `fieldId` and behaviour is unchanged
+    // (fire-and-forget), which is what keeps already-shipped cards and builds working.
+    case seatChart(rows: [HermesSeatRow], selectedSeatId: String?, fieldId: String? = nil)   // interactive picker: tap selects locally, a separate primary CTA commits
+    case quickReplyRow(options: [HermesQuickReplyOption], fieldId: String? = nil)            // single-tap chips: tapping immediately composes+inserts a reply
 
     // v3 vocabulary — richer content primitives.
 
@@ -177,7 +220,7 @@ public indirect enum HermesNode: Codable, Equatable, Sendable {
     /// SELECT-THEN-CONFIRM picker (the generalized seatChart interaction): tapping an option
     /// only highlights it locally; a separate primary CTA labeled `confirmLabel` commits the
     /// selection as a reply. REQUIRED for any card that asks the user to choose something.
-    case optionPicker(options: [HermesPickerOption], selectedId: String?, confirmLabel: String?, style: HermesPickerStyle)
+    case optionPicker(options: [HermesPickerOption], selectedId: String?, confirmLabel: String?, style: HermesPickerStyle, fieldId: String? = nil)
 
     // v4 — real ADA scene/instrument centerpieces (custom-drawn, encode real state). See the
     // Step 0 block above. Each is the HERO of its card genre, not a retint of a flat element.

@@ -357,25 +357,26 @@ final class MessagesViewController: MSMessagesAppViewController {
             root: layout.root, actions: nil
         )
         let actions = layout.actions ?? []
+        // ONE form state for the whole card: the inputs inside the scroll view and the pinned
+        // submit bar below it are separate view trees, so they must be handed the same object
+        // or the bar would relabel off state nobody is writing to.
+        let form = HermesFormState(seededFrom: layout)
         let view = ScrollView {
-            HermesLayoutRenderer(layout: bodyWithoutActions, presentation: presentation) { [weak self] action in
-                self?.handle(action, sourceLayout: layout, sourceSession: sourceSession, conversation: conversation)
+            HermesLayoutRenderer(layout: bodyWithoutActions, presentation: presentation, form: form) { [weak self] action in
+                self?.handle(action, form: form, sourceLayout: layout, sourceSession: sourceSession, conversation: conversation)
             }
             .padding(presentation == .compact ? 0 : 8)
         }
         .safeAreaInset(edge: .bottom) {
-            if !actions.isEmpty {
-                VStack(spacing: 8) {
-                    ForEach(actions, id: \.id) { action in
-                        HermesPrimaryCTA(label: action.label, systemImage: action.systemImage) { [weak self] in
-                            self?.handle(action, sourceLayout: layout, sourceSession: sourceSession, conversation: conversation)
-                        }
-                    }
+            if !actions.isEmpty || form.hasInputs {
+                HermesSubmitBar(layout: layout, actions: actions) { [weak self] action in
+                    self?.handle(action, form: form, sourceLayout: layout, sourceSession: sourceSession, conversation: conversation)
                 }
                 .padding(12)
                 .background(.regularMaterial)
             }
         }
+        .environmentObject(form)
         // Atmosphere cards extend their dark canvas past the renderer's bounds (scroll
         // overshoot, safe areas) instead of flashing grouped-gray around a dark scene.
         .background(HermesLayoutRenderer.canvasColor(for: layout))
@@ -482,17 +483,17 @@ final class MessagesViewController: MSMessagesAppViewController {
     ///     reply. This is how a display card offers "Open in Spotify" / "View in Maps" without
     ///     spamming the thread with a fake "✓ Open in Spotify" bubble — the exact bug this
     ///     split fixes.
-    private func handle(_ action: HermesAction, sourceLayout: HermesLayout, sourceSession: MSSession?, conversation: MSConversation) {
+    private func handle(_ action: HermesAction, form: HermesFormState, sourceLayout: HermesLayout, sourceSession: MSSession?, conversation: MSConversation) {
         // Routing decision lives in the Shared package (HermesAction.insertsReply) so it's
         // unit-tested and both targets agree.
         if action.insertsReply {
-            insertReply(for: action, sourceLayout: sourceLayout, sourceSession: sourceSession, conversation: conversation)
+            insertReply(for: action, form: form, sourceLayout: sourceLayout, sourceSession: sourceSession, conversation: conversation)
         } else {
             openDeepLink(action)
         }
     }
 
-    private func insertReply(for action: HermesAction, sourceLayout: HermesLayout, sourceSession: MSSession?, conversation: MSConversation) {
+    private func insertReply(for action: HermesAction, form: HermesFormState, sourceLayout: HermesLayout, sourceSession: MSSession?, conversation: MSConversation) {
         let reply = HermesLayout(
             version: 1,
             title: "✓ \(action.label)",
@@ -505,7 +506,19 @@ final class MessagesViewController: MSMessagesAppViewController {
                     .text(action.label, style: .init(role: .headline, weight: .semibold))
                 ]),
                 .text("Tapped from \(sourceLayout.title ?? "HermesShare")", style: .init(role: .footnote, colorHex: "#8E8E93"))
-            ])
+            ]),
+            // ADDITIVE: the title and body above are unchanged, so old readers and the
+            // transcript bubble see exactly what they saw before. This is the machine-readable
+            // half — field identity + raw ids — attached to the SAME single reply.
+            // ponytail: on-device inputs are single-select, so every field widens to a
+            // one-element array. The wire type is already [String: [String]] — a multi-select
+            // node just stops calling mapValues. Unanswered fields are absent from form.values
+            // and so are absent here; the writer never emits null or a placeholder.
+            submission: form.isEmpty ? nil : HermesSubmission(
+                formId: sourceLayout.formId,
+                actionId: action.id,
+                values: form.values.mapValues { [$0] }
+            )
         )
         // Reuse the source card's session so the reply updates that card's bubble in place.
         let message = Self.makeMessage(for: reply, session: sourceSession ?? MSSession())

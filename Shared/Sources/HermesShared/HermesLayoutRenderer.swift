@@ -54,14 +54,27 @@ public struct HermesLayoutRenderer: View {
     /// Called when the user taps an action button. Defaults to opening the deep-link URL.
     public var onAction: ((HermesAction) -> Void)?
 
+    /// Shared state for every `fieldId` input in this card. Hosts that draw their OWN submit bar
+    /// outside the renderer (the extension pins one under the scroll view) pass their instance
+    /// in so both halves read and write the same values.
+    @StateObject private var form: HermesFormState
+
+    /// A host that injects its own form state also draws its own submit bar (the extension pins
+    /// one under the scroll view). The renderer must not draw a second one — that would put two
+    /// Confirm buttons on a form card, which is the whole bug this protocol exists to kill.
+    private let hostOwnsSubmitBar: Bool
+
     public init(
         layout: HermesLayout,
         presentation: HermesPresentation = .expanded,
+        form: HermesFormState? = nil,
         onAction: ((HermesAction) -> Void)? = nil
     ) {
         self.layout = layout
         self.presentation = presentation
         self.onAction = onAction
+        self.hostOwnsSubmitBar = (form != nil)
+        _form = StateObject(wrappedValue: form ?? HermesFormState(seededFrom: layout))
     }
 
     private var accent: Color {
@@ -93,10 +106,13 @@ public struct HermesLayoutRenderer: View {
 
             HermesNodeView(node: layout.root)
 
-            if let actions = layout.actions, !actions.isEmpty {
-                actionBar(actions)
+            // One submit bar per card. `hasInputs` keeps a form with no authored actions from
+            // being stranded with nothing to send it.
+            if !hostOwnsSubmitBar, !(layout.actions ?? []).isEmpty || form.hasInputs {
+                actionBar(layout.actions ?? [])
             }
         }
+        .environmentObject(form)
         .padding(presentation.outerPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(background)
@@ -134,15 +150,11 @@ public struct HermesLayoutRenderer: View {
     }
 
     @ViewBuilder private func actionBar(_ actions: [HermesAction]) -> some View {
-        VStack(spacing: 8) {
-            ForEach(actions, id: \.id) { action in
-                HermesPrimaryCTA(label: action.label, systemImage: action.systemImage) {
-                    if let onAction {
-                        onAction(action)
-                    } else {
-                        HermesActionHandler.openDeepLink(action)
-                    }
-                }
+        HermesSubmitBar(layout: layout, actions: actions) { action in
+            if let onAction {
+                onAction(action)
+            } else {
+                HermesActionHandler.openDeepLink(action)
             }
         }
     }
@@ -262,11 +274,11 @@ public struct HermesNodeView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(glassCardBackground(cornerRadius: cornerRadius, backgroundHex: backgroundHex))
 
-        case let .seatChart(rows, selectedSeatId):
-            HermesSeatChartView(rows: rows, initialSelectedSeatId: selectedSeatId)
+        case let .seatChart(rows, selectedSeatId, fieldId):
+            HermesSeatChartView(rows: rows, initialSelectedSeatId: selectedSeatId, fieldId: fieldId)
 
-        case let .quickReplyRow(options):
-            HermesQuickReplyRowView(options: options)
+        case let .quickReplyRow(options, fieldId):
+            HermesQuickReplyRowView(options: options, fieldId: fieldId)
 
         case let .checklist(items):
             checklistView(items)
@@ -298,10 +310,10 @@ public struct HermesNodeView: View {
         case let .barChart(bars, maxValue):
             barChartView(bars, maxValue)
 
-        case let .optionPicker(options, selectedId, confirmLabel, style):
+        case let .optionPicker(options, selectedId, confirmLabel, style, fieldId):
             HermesOptionPickerView(
                 options: options, initialSelectedId: selectedId,
-                confirmLabel: confirmLabel, style: style
+                confirmLabel: confirmLabel, style: style, fieldId: fieldId
             )
 
         case let .flightBoard(board):
@@ -878,6 +890,61 @@ public struct HermesPrimaryCTA: View {
     }
 }
 
+/// The ONE submit for a card. Shows a live one-line summary of the current `fieldId` selections
+/// above a single primary CTA whose label carries that same summary, so the button visibly
+/// changes as the user fills the form and there is never more than one thing that sends.
+/// Shared by the renderer's own action bar and by the extension's pinned bar so both relabel
+/// identically off the same `HermesFormState`.
+public struct HermesSubmitBar: View {
+    public let layout: HermesLayout
+    public let actions: [HermesAction]
+    public let onAction: (HermesAction) -> Void
+    @EnvironmentObject private var form: HermesFormState
+
+    public init(layout: HermesLayout, actions: [HermesAction], onAction: @escaping (HermesAction) -> Void) {
+        self.layout = layout
+        self.actions = actions
+        self.onAction = onAction
+    }
+
+    /// A card with inputs but no authored `actions` still needs a way out, or the user fills in
+    /// a form with nothing to press.
+    private var submitActions: [HermesAction] {
+        guard actions.isEmpty, form.hasInputs else { return actions }
+        return [HermesAction(id: "form-submit", label: "Confirm",
+                             systemImage: "checkmark.seal.fill",
+                             deepLinkURL: "hermesshare://action?id=form-submit")]
+    }
+
+    public var body: some View {
+        let summary = form.summary(for: layout)
+        VStack(spacing: 8) {
+            if !summary.isEmpty {
+                Text(summary)
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            ForEach(submitActions, id: \.id) { action in
+                HermesPrimaryCTA(label: buttonLabel(action, summary), systemImage: action.systemImage) {
+                    onAction(action)
+                }
+            }
+        }
+    }
+
+    private func buttonLabel(_ action: HermesAction, _ summary: String) -> String {
+        guard !summary.isEmpty else { return action.label }
+        // ponytail: fixed character budget, not a measured text fit. The CTA is full-width and
+        // must stay one line; swap in a GeometryReader measurement only if a real label wraps.
+        let budget = 28
+        let short = summary.count > budget ? String(summary.prefix(budget - 1)) + "…" : summary
+        return "\(action.label) · \(short)"
+    }
+}
+
 // MARK: - Seat chart
 
 /// Interactive seat picker. Tapping an available seat only updates local selection state
@@ -886,12 +953,17 @@ public struct HermesPrimaryCTA: View {
 /// reply-message insert).
 struct HermesSeatChartView: View {
     let rows: [HermesSeatRow]
+    /// Non-nil = this chart is a FORM INPUT: it writes to the shared form state and draws no
+    /// Confirm button of its own (the card's single submit bar sends).
+    let fieldId: String?
     @State private var selectedSeatId: String?
     @Environment(\.hermesAccent) private var accent
     @Environment(\.hermesOnAction) private var onAction
+    @EnvironmentObject private var form: HermesFormState
 
-    init(rows: [HermesSeatRow], initialSelectedSeatId: String?) {
+    init(rows: [HermesSeatRow], initialSelectedSeatId: String?, fieldId: String? = nil) {
         self.rows = rows
+        self.fieldId = fieldId
         // Honor either the explicit selectedSeatId or a seat pre-marked "selected" in JSON.
         let preselected = initialSelectedSeatId
             ?? rows.flatMap(\.seats).first(where: { $0.state == .selected })?.id
@@ -920,18 +992,20 @@ struct HermesSeatChartView: View {
             .padding(.horizontal, 6)
             .padding(.bottom, 14)
             .background(HermesCabinFrame(tint: accent))
-            HermesPrimaryCTA(
-                label: selectedSeatId.map { "Confirm Seat \($0)" } ?? "Select a seat",
-                systemImage: "checkmark.seal.fill",
-                isEnabled: selectedSeatId != nil
-            ) {
-                guard let seatId = selectedSeatId else { return }
-                onAction(HermesAction(
-                    id: "seat-confirm",
-                    label: "Confirm Seat \(seatId)",
+            if fieldId == nil {
+                HermesPrimaryCTA(
+                    label: selectedSeatId.map { "Confirm Seat \($0)" } ?? "Select a seat",
                     systemImage: "checkmark.seal.fill",
-                    deepLinkURL: "hermesshare://action?id=seat-confirm&seat=\(seatId)"
-                ))
+                    isEnabled: selectedSeatId != nil
+                ) {
+                    guard let seatId = selectedSeatId else { return }
+                    onAction(HermesAction(
+                        id: "seat-confirm",
+                        label: "Confirm Seat \(seatId)",
+                        systemImage: "checkmark.seal.fill",
+                        deepLinkURL: "hermesshare://action?id=seat-confirm&seat=\(seatId)"
+                    ))
+                }
             }
         }
     }
@@ -1012,9 +1086,11 @@ struct HermesSeatChartView: View {
             .onTapGesture {
                 guard isTappable else { return }
                 withAnimation(.snappy(duration: 0.2)) {
-                    // Tap again to deselect; tap another seat to move the selection.
-                    selectedSeatId = isSelected ? nil : seat.id
+                    // Tap again to deselect; tap another seat to move the selection. As a form
+                    // input a tap always selects — there is no "unset" in the values map.
+                    selectedSeatId = (isSelected && fieldId == nil) ? nil : seat.id
                 }
+                if let fieldId { form.set(fieldId, seat.id) }
             }
             .accessibilityLabel("Seat \(seat.id), \(isSelected ? "selected" : seat.state.rawValue)")
             .accessibilityAddTraits(isTappable ? .isButton : [])
@@ -1139,15 +1215,19 @@ struct HermesOptionPickerView: View {
     let options: [HermesPickerOption]
     let confirmLabel: String?
     let style: HermesPickerStyle
+    /// Non-nil = FORM INPUT: writes to the shared form state, no Confirm button of its own.
+    let fieldId: String?
     @State private var selectedId: String?
     @Environment(\.hermesAccent) private var accent
     @Environment(\.hermesOnAction) private var onAction
+    @EnvironmentObject private var form: HermesFormState
 
     init(options: [HermesPickerOption], initialSelectedId: String?,
-         confirmLabel: String?, style: HermesPickerStyle) {
+         confirmLabel: String?, style: HermesPickerStyle, fieldId: String? = nil) {
         self.options = options
         self.confirmLabel = confirmLabel
         self.style = style
+        self.fieldId = fieldId
         _selectedId = State(initialValue: initialSelectedId)
     }
 
@@ -1173,18 +1253,20 @@ struct HermesOptionPickerView: View {
                 }
             }
 
-            HermesPrimaryCTA(
-                label: ctaLabel,
-                systemImage: "checkmark.seal.fill",
-                isEnabled: selectedId != nil
-            ) {
-                guard let option = selectedOption else { return }
-                onAction(HermesAction(
-                    id: "option-confirm",
-                    label: "\(confirmLabel ?? "Confirm"): \(option.label)",
+            if fieldId == nil {
+                HermesPrimaryCTA(
+                    label: ctaLabel,
                     systemImage: "checkmark.seal.fill",
-                    deepLinkURL: "hermesshare://action?id=option-confirm&option=\(option.id.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? option.id)"
-                ))
+                    isEnabled: selectedId != nil
+                ) {
+                    guard let option = selectedOption else { return }
+                    onAction(HermesAction(
+                        id: "option-confirm",
+                        label: "\(confirmLabel ?? "Confirm"): \(option.label)",
+                        systemImage: "checkmark.seal.fill",
+                        deepLinkURL: "hermesshare://action?id=option-confirm&option=\(option.id.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? option.id)"
+                    ))
+                }
             }
         }
     }
@@ -1199,8 +1281,10 @@ struct HermesOptionPickerView: View {
     private func toggle(_ option: HermesPickerOption) {
         guard !option.disabled else { return }
         withAnimation(.snappy(duration: 0.2)) {
-            selectedId = (selectedId == option.id) ? nil : option.id
+            // As a form input a tap always selects — the values map has no "unset".
+            selectedId = (selectedId == option.id && fieldId == nil) ? nil : option.id
         }
+        if let fieldId { form.set(fieldId, option.id) }
     }
 
     @ViewBuilder private func optionRow(_ option: HermesPickerOption) -> some View {
@@ -1837,13 +1921,27 @@ struct HermesMediaListView: View {
 /// centered flow (never a single-row horizontal scroll a user has to discover).
 struct HermesQuickReplyRowView: View {
     let options: [HermesQuickReplyOption]
+    /// Non-nil = FORM INPUT: a chip tap records a value instead of sending; the card's single
+    /// submit bar is what sends. The picked chip gets a ring so the choice is visible.
+    let fieldId: String?
     @Environment(\.hermesAccent) private var accent
     @Environment(\.hermesOnAction) private var onAction
+    @EnvironmentObject private var form: HermesFormState
+
+    init(options: [HermesQuickReplyOption], fieldId: String? = nil) {
+        self.options = options
+        self.fieldId = fieldId
+    }
 
     var body: some View {
         HermesFlowLayout(spacing: 16, rowSpacing: 14) {
             ForEach(options, id: \.id) { option in
+                let isPicked = fieldId.map { form.values[$0] == option.id } ?? false
                 Button {
+                    if let fieldId {
+                        form.set(fieldId, option.id)
+                        return
+                    }
                     onAction(HermesAction(
                         id: option.id,
                         label: option.label,
@@ -1861,6 +1959,10 @@ struct HermesQuickReplyRowView: View {
                                     )
                                 )
                                 .frame(width: 56, height: 56)
+                                .overlay(
+                                    Circle().stroke(accent, lineWidth: isPicked ? 3 : 0)
+                                        .padding(-3)
+                                )
                             if let sym = option.systemImage {
                                 Image(systemName: sym)
                                     .font(.system(size: 22, weight: .semibold))

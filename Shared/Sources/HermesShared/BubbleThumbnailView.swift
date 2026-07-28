@@ -27,7 +27,7 @@ public extension HermesLayout {
                let url = item.heroImageUrl { return url }
             if let url = items.compactMap(\.heroImageUrl).first { return url }
             if let url = items.compactMap({ $0.rooms.compactMap(\.imageUrl).first }).first { return url }
-        case let .optionPicker(options, _, _, _):
+        case let .optionPicker(options, _, _, _, _):
             if let url = options.compactMap(\.imageUrl).first { return url }
         case let .mediaList(items):
             if let url = items.compactMap(\.imageUrl).first { return url }

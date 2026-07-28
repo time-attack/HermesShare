@@ -127,7 +127,7 @@ final class HermesLayoutCodableTests: XCTestCase {
         }
         """
         let node = try JSONDecoder().decode(HermesNode.self, from: Data(json.utf8))
-        guard case let .seatChart(rows, selectedSeatId) = node else {
+        guard case let .seatChart(rows, selectedSeatId, _) = node else {
             return XCTFail("Expected .seatChart node")
         }
         XCTAssertNil(selectedSeatId)
@@ -157,7 +157,7 @@ final class HermesLayoutCodableTests: XCTestCase {
         }
         """
         let node = try JSONDecoder().decode(HermesNode.self, from: Data(json.utf8))
-        guard case let .quickReplyRow(options) = node else {
+        guard case let .quickReplyRow(options, _) = node else {
             return XCTFail("Expected .quickReplyRow node")
         }
         XCTAssertEqual(options.count, 2)
@@ -166,6 +166,106 @@ final class HermesLayoutCodableTests: XCTestCase {
 
         let reDecoded = try JSONDecoder().decode(HermesNode.self, from: JSONEncoder().encode(node))
         XCTAssertEqual(node, reDecoded)
+    }
+
+    /// Form protocol: two `fieldId` inputs survive the wire, a `submission` round-trips, and
+    /// both keys stay ABSENT when unused (that absence is the backwards-compatibility promise).
+    func testFormFieldIdsAndSubmissionRoundTrip() throws {
+        let json = """
+        {
+          "version": 1,
+          "title": "Seat + bags",
+          "formId": "checkin:UA2850:GSPE2T:7c3f91",
+          "root": { "type": "vstack", "children": [
+            { "type": "seatChart", "fieldId": "seat", "rows": [
+              { "rowNumber": 23, "seats": [{ "id": "23D", "letter": "D", "state": "selected" }] }
+            ]},
+            { "type": "optionPicker", "fieldId": "bags", "options": [
+              { "id": "bags0", "label": "No bags" }, { "id": "bags1", "label": "1 bag" }
+            ]}
+          ]},
+          "actions": [{ "id": "book", "label": "Book", "deepLinkURL": "hermesshare://action?id=book" }]
+        }
+        """
+        let layout = try HermesLayout.decode(fromJSONString: json)
+        guard case let .vstack(_, _, children) = layout.root else { return XCTFail("Expected vstack") }
+        guard case let .seatChart(_, _, seatField) = children[0] else { return XCTFail("Expected seatChart") }
+        guard case let .optionPicker(_, _, _, _, bagsField) = children[1] else { return XCTFail("Expected optionPicker") }
+        XCTAssertEqual(seatField, "seat")
+        XCTAssertEqual(bagsField, "bags")
+        XCTAssertEqual(layout.formId, "checkin:UA2850:GSPE2T:7c3f91")
+        XCTAssertNil(layout.submission)
+        XCTAssertEqual(layout, try HermesLayout.decode(from: layout.encoded()))
+
+        // The v2 reply envelope, asserted as EXACT bytes so the wire is reviewable by eye.
+        let reply = HermesLayout(
+            title: "✓ Confirm",
+            root: layout.root,
+            submission: HermesSubmission(
+                formId: layout.formId,
+                actionId: "checkin-submit",
+                values: ["seat": ["23D"], "bags": ["bag-1"]]
+            )
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        let envelope = String(decoding: try encoder.encode(reply.submission), as: UTF8.self)
+        XCTAssertEqual(envelope, #"""
+        {"actionId":"checkin-submit","formId":"checkin:UA2850:GSPE2T:7c3f91","protocol":2,"values":{"bags":["bag-1"],"seat":["23D"]}}
+        """#)
+
+        let decoded = try HermesLayout.decode(from: reply.encoded())
+        XCTAssertEqual(decoded.submission, reply.submission)
+        XCTAssertEqual(decoded.submission?.protocolVersion, 2)
+        XCTAssertEqual(decoded.submission?.formId, "checkin:UA2850:GSPE2T:7c3f91")
+        XCTAssertEqual(decoded.submission?.values["seat"], ["23D"])   // always an array
+
+        // Presence rules: an unanswered field is ABSENT (never null, never a placeholder), and a
+        // deliberately-emptied multi-select is present as [].
+        let sparse = HermesSubmission(actionId: "a", values: ["answered": ["x"], "emptied": []])
+        let sparseText = String(decoding: try encoder.encode(sparse), as: UTF8.self)
+        XCTAssertEqual(sparseText,
+                       #"{"actionId":"a","protocol":2,"values":{"answered":["x"],"emptied":[]}}"#)
+        XCTAssertFalse(sparseText.contains("null"))
+        XCTAssertFalse(sparseText.contains("unanswered"))
+        XCTAssertNil(try JSONDecoder().decode(HermesSubmission.self,
+                                             from: Data(sparseText.utf8)).values["unanswered"])
+
+        // A card that uses none of it emits none of the keys — old readers see identical JSON.
+        let plain = HermesLayout(root: .quickReplyRow(options: [.init(id: "y", label: "Yes")]))
+        let text = String(decoding: try plain.encoded(), as: UTF8.self)
+        XCTAssertFalse(text.contains("submission"))
+        XCTAssertFalse(text.contains("fieldId"))
+        XCTAssertFalse(text.contains("formId"))
+    }
+
+    /// The submit-bar summary must follow TREE order, not dictionary order, or the one button's
+    /// label reshuffles between renders.
+    @MainActor
+    func testFormStateSeedsAndSummarizesInTreeOrder() throws {
+        let layout = HermesLayout(root: .vstack(spacing: 8, alignment: nil, children: [
+            .seatChart(rows: [HermesSeatRow(rowNumber: 23, seats: [
+                HermesSeat(id: "23D", letter: "D", state: .selected)
+            ])], selectedSeatId: nil, fieldId: "seat"),
+            .optionPicker(options: [.init(id: "bags1", label: "1 bag")],
+                          selectedId: nil, confirmLabel: nil, style: .list, fieldId: "bags")
+        ]))
+        let form = HermesFormState(seededFrom: layout)
+        XCTAssertTrue(form.hasInputs)
+        XCTAssertEqual(form.values, ["seat": "23D"])          // seeded from the selected seat
+        XCTAssertEqual(form.summary(for: layout), "23D")
+
+        form.set("bags", "bags1")
+        // Seat first (tree order) and the human LABEL for the picker, not the raw id.
+        XCTAssertEqual(form.summary(for: layout), "23D · 1 bag")
+        XCTAssertFalse(form.isEmpty)
+        // What the reply writer sends: single-select state widened to the v2 array wire shape.
+        XCTAssertEqual(form.values.mapValues { [$0] }, ["seat": ["23D"], "bags": ["bags1"]])
+
+        // A layout with no fieldId anywhere stays fire-and-forget: no state, no submit bar.
+        let legacy = HermesFormState(seededFrom: HermesSampleLayouts.seatSelection)
+        XCTAssertFalse(legacy.hasInputs)
+        XCTAssertTrue(legacy.isEmpty)
     }
 
     /// Unknown seat state should throw (strict vocabulary), not default.
@@ -232,7 +332,7 @@ final class HermesLayoutCodableTests: XCTestCase {
         XCTAssertEqual(entries[2].state, .future)                   // omitted → future
         guard case let .rating(_, maxValue, _, _) = children[2] else { return XCTFail("Expected rating") }
         XCTAssertEqual(maxValue, 5)                                 // omitted → 5
-        guard case let .optionPicker(options, selectedId, _, style) = children[10] else { return XCTFail("Expected optionPicker") }
+        guard case let .optionPicker(options, selectedId, _, style, _) = children[10] else { return XCTFail("Expected optionPicker") }
         XCTAssertNil(selectedId)
         XCTAssertEqual(style, .grid)
         XCTAssertFalse(options[0].disabled)

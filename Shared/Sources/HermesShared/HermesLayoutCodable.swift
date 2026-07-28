@@ -50,6 +50,8 @@ extension HermesNode {
         case catalogItems, initialExpandedId
         case sectionId, initiallyExpanded
         case title, badge
+        // form protocol — optional on seatChart / quickReplyRow / optionPicker
+        case fieldId
     }
 
     private enum Kind: String, Codable {
@@ -150,11 +152,13 @@ extension HermesNode {
         case .seatChart:
             self = .seatChart(
                 rows: try c.decode([HermesSeatRow].self, forKey: .rows),
-                selectedSeatId: try c.decodeIfPresent(String.self, forKey: .selectedSeatId)
+                selectedSeatId: try c.decodeIfPresent(String.self, forKey: .selectedSeatId),
+                fieldId: try c.decodeIfPresent(String.self, forKey: .fieldId)
             )
         case .quickReplyRow:
             self = .quickReplyRow(
-                options: try c.decode([HermesQuickReplyOption].self, forKey: .options)
+                options: try c.decode([HermesQuickReplyOption].self, forKey: .options),
+                fieldId: try c.decodeIfPresent(String.self, forKey: .fieldId)
             )
         case .checklist:
             self = .checklist(items: try c.decode([HermesChecklistItem].self, forKey: .items))
@@ -214,7 +218,8 @@ extension HermesNode {
                 options: try c.decode([HermesPickerOption].self, forKey: .options),
                 selectedId: try c.decodeIfPresent(String.self, forKey: .selectedId),
                 confirmLabel: try c.decodeIfPresent(String.self, forKey: .confirmLabel),
-                style: try c.decodeIfPresent(HermesPickerStyle.self, forKey: .pickerStyle) ?? .list
+                style: try c.decodeIfPresent(HermesPickerStyle.self, forKey: .pickerStyle) ?? .list,
+                fieldId: try c.decodeIfPresent(String.self, forKey: .fieldId)
             )
         case .flightBoard:
             self = .flightBoard(try c.decode(HermesFlightBoard.self, forKey: .board))
@@ -314,13 +319,15 @@ extension HermesNode {
             try c.encode(cornerRadius, forKey: .cornerRadius)
             try c.encodeIfPresent(backgroundHex, forKey: .backgroundHex)
             try c.encode(child, forKey: .child)
-        case let .seatChart(rows, selectedSeatId):
+        case let .seatChart(rows, selectedSeatId, fieldId):
             try c.encode(Kind.seatChart, forKey: .type)
             try c.encode(rows, forKey: .rows)
             try c.encodeIfPresent(selectedSeatId, forKey: .selectedSeatId)
-        case let .quickReplyRow(options):
+            try c.encodeIfPresent(fieldId, forKey: .fieldId)
+        case let .quickReplyRow(options, fieldId):
             try c.encode(Kind.quickReplyRow, forKey: .type)
             try c.encode(options, forKey: .options)
+            try c.encodeIfPresent(fieldId, forKey: .fieldId)
         case let .checklist(items):
             try c.encode(Kind.checklist, forKey: .type)
             try c.encode(items, forKey: .items)
@@ -368,12 +375,13 @@ extension HermesNode {
             try c.encode(Kind.barChart, forKey: .type)
             try c.encode(bars, forKey: .bars)
             try c.encodeIfPresent(maxValue, forKey: .maxValue)
-        case let .optionPicker(options, selectedId, confirmLabel, style):
+        case let .optionPicker(options, selectedId, confirmLabel, style, fieldId):
             try c.encode(Kind.optionPicker, forKey: .type)
             try c.encode(options, forKey: .options)
             try c.encodeIfPresent(selectedId, forKey: .selectedId)
             try c.encodeIfPresent(confirmLabel, forKey: .confirmLabel)
             try c.encode(style, forKey: .pickerStyle)
+            try c.encodeIfPresent(fieldId, forKey: .fieldId)
         case let .flightBoard(board):
             try c.encode(Kind.flightBoard, forKey: .type)
             try c.encode(board, forKey: .board)

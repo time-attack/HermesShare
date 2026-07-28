@@ -47,6 +47,43 @@ conversation (the GamePigeon mechanic). Outside iMessage it opens `deepLinkURL`.
 If an interaction needs "pick, then confirm," model it like `seatChart` (local state + CTA).
 If it's a single irreversible choice, use `quickReplyRow`.
 
+### Multi-input cards: `fieldId` (ask for more than one thing at once)
+
+Add an optional `"fieldId"` to `seatChart`, `optionPicker`, or `quickReplyRow` and the control
+becomes a **form input** instead of its own send button:
+
+```json
+{ "title": "Your flight",
+  "formId": "checkin:UA2850:GSPE2T:7c3f91",
+  "root": { "type": "vstack", "children": [
+    { "type": "seatChart",    "fieldId": "seat", "rows": [ ... ] },
+    { "type": "optionPicker", "fieldId": "bags", "options": [
+      { "id": "bags0", "label": "No bags" }, { "id": "bags1", "label": "1 bag" } ] }
+  ]},
+  "actions": [ { "id": "book", "label": "Confirm",
+                 "deepLinkURL": "hermesshare://action?id=book" } ] }
+```
+
+- A control WITH `fieldId` draws **no Confirm button of its own** and sends nothing on tap.
+- The card gets **exactly one** submit button (the `actions` entry, or an auto "Confirm" if you
+  omit `actions`), with a live summary of the current picks above it. Its label grows with the
+  selections: `Confirm · 23D · 1 bag`.
+- Tapping it inserts **one** reply carrying a machine-readable `submission` envelope:
+  ```json
+  "submission": {
+    "protocol": 2,
+    "formId": "checkin:UA2850:GSPE2T:7c3f91",
+    "actionId": "checkin-submit",
+    "values": { "seat": ["23D"], "bags": ["bag-1"] } }
+  ```
+  `values` is **always** `fieldId -> [option id]` (raw ids, never labels) — an array even for a
+  single-select field, so there is one parse path per field. An unanswered field with no prefill
+  is **omitted** from `values`; an emptied multi-select is `[]`; `null` never appears.
+  `formId` is echoed verbatim from the card — mint it to carry whatever context you need to
+  correlate the answer, since the device treats it as opaque.
+- Omit `fieldId` and everything behaves exactly as it always has (each control sends its own
+  reply). Single-select per field only.
+
 ## Node types (`root` tree)
 
 Every node is `{ "type": "<name>", ...payload }`. Unknown types fail decoding — the whole
