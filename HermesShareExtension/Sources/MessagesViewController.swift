@@ -453,7 +453,20 @@ final class MessagesViewController: MSMessagesAppViewController {
             template.caption = caption
             template.subcaption = layout.subtitle
         }
-        message.layout = template
+        // MSMessageLiveLayout, NOT the bare template — this is what makes a reply READABLE.
+        // Structural diff of chat.db between a GamePigeon move and a HermesShare reply, both
+        // is_from_me=1 on the same device: GamePigeon's archive carries `URL` (an NSURL),
+        // `appid` and `liveLayoutInfo`; ours carried none of them. iOS keeps MSMessage.url in the
+        // local archive for a SENT message only when the balloon is a live layout, because a live
+        // bubble is re-rendered by the extension on every transcript draw and therefore still
+        // needs its payload. A template bubble is fully described by caption + image, so the URL is
+        // discarded once sent — which silently destroyed the whole `submission` read path.
+        // Reading the reply back out of the synced Messages DB is exactly how OpenPigeon recovers
+        // an 8-Ball move. The alternate template above is what devices without the app see.
+        // NOTE: outbound CARDS deliberately stay plain template layouts (Linq "interactive": false)
+        // so the system opens them on tap and layout.image_url previews attach — we never need to
+        // read our own card back. Only replies need the URL to survive.
+        message.layout = MSMessageLiveLayout(alternateLayout: template)
         message.summaryText = layout.title ?? "HermesShare card"
         // Cache at compose time: if this bubble is later selected with a nil url (see
         // presentContent), the renderer can recover the layout from the session cache.
