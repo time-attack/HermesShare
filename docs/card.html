@@ -241,6 +241,44 @@ try {
   });
   document.getElementById('foot').textContent =
     'rendered in Spectrum’s webview from the ?p= payload · ' + JSON.stringify(L).length + ' bytes';
+
+  // ?diag=1 — probes what this webview actually allows. Three independent signals, so one look
+  // tells us whether the page is live, whether touch fires, and whether network is reachable.
+  if (new URLSearchParams(location.search).get('diag')) {
+    const box = el('div', 'card');
+    box.style.cssText += 'padding:16px;border-radius:18px;margin-top:20px';
+    const rows = el('div', 'vstack'); rows.style.gap = '12px';
+
+    const line = (label, id) => {
+      const r = el('div', 'kv');
+      const k = el('div', 'k'); k.textContent = label;
+      const v = el('div', 'v'); v.id = id; v.textContent = '…';
+      r.append(k, v); rows.append(r); return v;
+    };
+    const clock = line('1 · JS alive', 'd-clock');
+    const taps  = line('2 · taps fire', 'd-taps');
+    const net   = line('3 · network', 'd-net');
+
+    let n = 0;
+    setInterval(() => { clock.textContent = 'tick ' + (++n); }, 1000);
+
+    let t = 0;
+    taps.textContent = 'tap the bar below';
+    const btn = el('div', 'act');
+    btn.textContent = 'TAP HERE';
+    btn.style.marginTop = '14px';
+    const bump = e => { e.preventDefault(); taps.textContent = 'YES — ' + (++t); btn.textContent = 'tapped ' + t + '×'; };
+    btn.addEventListener('click', bump);
+    btn.addEventListener('touchend', bump);
+
+    fetch('https://time-attack.github.io/HermesShare/card-stub.json?t=' + Date.now())
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(() => { net.textContent = 'YES — fetch ok'; })
+      .catch(e => { net.textContent = 'NO — ' + e; });
+
+    box.append(rows, btn);
+    out.append(box);
+  }
 } catch (e) {
   const d = el('div', 'err');
   d.textContent = 'Could not render card:\n' + e.message + '\n\n' + location.href.slice(0, 300);
