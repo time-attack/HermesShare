@@ -134,8 +134,13 @@ def validate(layout: dict, S: dict) -> list[str]:
     if fields:
         if len(set(fields)) != len(fields):
             errs.append(f"duplicate fieldId values: {fields}")
-        if len(actions) != 1:
-            errs.append(f"{len(fields)} form field(s) but {len(actions)} layout action(s) — need exactly 1 submit")
+        # Only a hermesshare:// action submits. An https:// action opens externally and inserts no
+        # reply (see HermesAction.insertsReply), so "Choose seat on cathaypacific.com" alongside the
+        # submit is legal and is the right way to defer a step to the airline's own flow.
+        submits = [a for a in actions if str(a.get("deepLinkURL", "")).startswith("hermesshare://")]
+        if len(submits) != 1:
+            errs.append(f"{len(fields)} form field(s) but {len(submits)} hermesshare:// submit action(s)"
+                        f" — need exactly 1 (of {len(actions)} action(s) total)")
         if not layout.get("formId"):
             errs.append("form card is missing 'formId' (needed to correlate the reply)")
     # A scene-less card gets no bubble art at all (GenericGraphic is a 1x1 clear pixel).
