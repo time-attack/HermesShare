@@ -316,6 +316,14 @@ final class MessagesViewController: MSMessagesAppViewController {
         }
     }
 
+    /// Tap on a live-layout bubble's inline view. If this never logs, iOS 26 does not deliver
+    /// transcript touches to the extension at all — in which case drop the "Tap to open" label
+    /// from TranscriptCardPreview rather than promising an interaction that cannot happen.
+    @objc private func transcriptTapped() {
+        debugLog("EVENT transcript tap — requesting .expanded")
+        requestPresentationStyle(.expanded)
+    }
+
     private func showRenderer(layout: HermesLayout, style: MSMessagesAppPresentationStyle, conversation: MSConversation, sourceSession: MSSession?) {
         // A live-layout message makes iOS run this controller INSIDE the transcript bubble with
         // style == .transcript. Falling through to the code below drew the whole scrolling card
@@ -325,9 +333,16 @@ final class MessagesViewController: MSMessagesAppViewController {
         // https://developer.apple.com/documentation/messages/msmessagesappviewcontroller/didselect(_:conversation:)
         if style == .transcript {
             debugLog("RENDER transcript preview — session=\(HermesLayoutSessionCache.key(for: sourceSession) ?? "nil") title=\(layout.title ?? "nil")")
-            let preview = TranscriptCardPreview(layout: layout)
-                .onTapGesture { [weak self] in self?.requestPresentationStyle(.expanded) }
-            embed(UIHostingController(rootView: AnyView(preview)))
+            let host = UIHostingController(rootView: AnyView(TranscriptCardPreview(layout: layout)))
+            embed(host)
+            // The recognizer goes on OUR root view, not on the SwiftUI content: this is the view
+            // Messages sizes and hit-tests, and a SwiftUI .onTapGesture here never fired (its frame
+            // is resolved by SwiftUI, which Messages may size differently). Logging both frames so
+            // a mis-framed host is visible rather than guessed at.
+            if view.gestureRecognizers?.isEmpty ?? true {
+                view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(transcriptTapped)))
+            }
+            debugLog("RENDER transcript frames — root=\(view.bounds.size) host=\(host.view.frame)")
             return
         }
         let presentation: HermesPresentation = (style == .expanded) ? .expanded : .compact
