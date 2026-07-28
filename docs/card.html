@@ -1,0 +1,224 @@
+<!doctype html>
+<!-- Web fallback renderer. Photon's iMessage endpoint only accepts its own
+     codes.photon.Spectrum.MessagesExtension bundle id, so a Photon-sent card is handed to
+     Spectrum's webview and never reaches the native HermesShare extension. Spectrum loads the
+     bubble's URL as a page, so this file decodes the same ?p= HermesLayout payload in JS and
+     renders it as HTML. Native renderer stays authoritative; keep this in sync with LAYOUT.md. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HermesShare</title>
+<style>
+  :root { color-scheme: dark; --accent: #0A84FF; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+    font: 16px/1.35 -apple-system, "SF Pro Text", system-ui, sans-serif;
+    color: #fff; background: #000;
+    background-image: radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 70%);
+    min-height: 100vh; overflow-x: hidden; overflow-wrap: break-word;
+  }
+  main { max-width: 640px; margin: 0 auto; }
+  header { margin-bottom: 18px; }
+  h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.4px; }
+  .sub { margin-top: 4px; color: #8E8E93; font-size: 14px; }
+  .vstack, .hstack { display: flex; }
+  .vstack { flex-direction: column; }
+  .hstack { flex-direction: row; }
+  .card {
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.11);
+    backdrop-filter: blur(20px) saturate(160%);
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 7px; align-self: flex-start;
+    padding: 5px 12px 5px 10px; border-radius: 999px; font-size: 13px; font-weight: 600;
+    background: rgba(255,255,255,.09);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+  .bar { height: 8px; border-radius: 999px; background: rgba(255,255,255,.13); overflow: hidden; }
+  .bar > i { display: block; height: 100%; border-radius: 999px; }
+  .kv { display: flex; align-items: baseline; gap: 12px; }
+  .kv .k { color: #8E8E93; font-size: 14px; flex: 0 0 auto; }
+  .kv .v { margin-left: auto; font-weight: 500; text-align: right; min-width: 0; overflow-wrap: anywhere; }
+  hr { border: 0; border-top: 1px solid rgba(255,255,255,.13); margin: 4px 0; width: 100%; }
+  .chk { display: flex; gap: 10px; align-items: flex-start; }
+  .box {
+    width: 21px; height: 21px; flex: 0 0 auto; border-radius: 50%; margin-top: 1px;
+    display: grid; place-items: center; font-size: 12px; font-weight: 700;
+    border: 1.5px solid rgba(255,255,255,.28);
+  }
+  .box.on { background: var(--accent); border-color: transparent; }
+  .detail { color: #8E8E93; font-size: 13px; margin-top: 2px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 9px 15px; border-radius: 999px; font-size: 14px; font-weight: 500;
+    background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.13);
+  }
+  .ring { display: grid; place-items: center; position: relative; flex: 0 0 auto; }
+  .ring b { position: absolute; font-size: 15px; font-weight: 700; }
+  .ring span { position: absolute; bottom: -17px; font-size: 11px; color: #8E8E93; }
+  .act {
+    display: block; margin-top: 10px; padding: 14px; border-radius: 14px; text-align: center;
+    font-weight: 600; text-decoration: none; color: #fff; background: var(--accent);
+  }
+  .unknown {
+    padding: 8px 12px; border-radius: 8px; font: 12px ui-monospace, monospace; color: #FF9F0A;
+    background: rgba(255,159,10,.12); border: 1px dashed rgba(255,159,10,.4);
+  }
+  .err { padding: 16px; border-radius: 12px; background: rgba(255,69,58,.15); color: #FF453A;
+         font: 13px ui-monospace, monospace; white-space: pre-wrap; word-break: break-all; }
+  footer { margin-top: 22px; color: #48484A; font-size: 11px; text-align: center; }
+</style>
+</head>
+<body>
+<main id="out"></main>
+<footer id="foot"></footer>
+<script>
+const ROLE = { largeTitle:[30,700], title:[24,700], headline:[17,600], subheadline:[15,600],
+               body:[16,400], callout:[15,400], footnote:[13,400], caption:[12,400], caption2:[11,400] };
+const WEIGHT = { regular:400, medium:500, semibold:600, bold:700, heavy:800 };
+
+const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
+const px = v => (v == null ? null : v + 'px');
+
+function decodePayload() {
+  const p = new URLSearchParams(location.search).get('p');
+  if (!p) throw new Error('No ?p= payload in the URL.');
+  let b = p.replace(/-/g, '+').replace(/_/g, '/');
+  b += '='.repeat((4 - b.length % 4) % 4);
+  const bin = atob(b);
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+function render(node) {
+  const t = node && node.type;
+  switch (t) {
+    case 'vstack': case 'hstack': {
+      const n = el('div', t);
+      n.style.gap = px(node.spacing ?? 8);
+      const a = node.alignment;
+      if (a) n.style.alignItems = a === 'leading' ? 'flex-start'
+                               : a === 'trailing' ? 'flex-end'
+                               : a === 'center' ? 'center' : 'stretch';
+      else if (t === 'vstack') n.style.alignItems = 'stretch';
+      (node.children || []).forEach(c => n.append(render(c)));
+      return n;
+    }
+    case 'text': {
+      const n = el('div');
+      const s = node.style || {};
+      const [size, weight] = ROLE[s.role] || ROLE.body;
+      n.style.fontSize = px(size);
+      n.style.fontWeight = WEIGHT[s.weight] || weight;
+      if (s.colorHex) n.style.color = s.colorHex;
+      if (s.alignment) n.style.textAlign = s.alignment === 'leading' ? 'left'
+                                        : s.alignment === 'trailing' ? 'right' : 'center';
+      n.textContent = node.text || '';
+      return n;
+    }
+    case 'statusBadge': {
+      const n = el('div', 'badge');
+      const d = el('i', 'dot');
+      d.style.background = node.colorHex || 'var(--accent)';
+      n.append(d, document.createTextNode(node.label || ''));
+      return n;
+    }
+    case 'progressBar': {
+      const n = el('div', 'bar'), f = el('i');
+      f.style.width = Math.max(0, Math.min(1, node.value ?? 0)) * 100 + '%';
+      f.style.background = node.colorHex || 'var(--accent)';
+      n.append(f);
+      if (!node.label) return n;
+      const w = el('div', 'vstack'); w.style.gap = '6px';
+      const l = el('div'); l.className = 'detail'; l.textContent = node.label;
+      w.append(n, l); return w;
+    }
+    case 'progressRing': {
+      const v = Math.max(0, Math.min(1, node.value ?? 0)), size = 62, col = node.colorHex || 'var(--accent)';
+      const n = el('div', 'ring');
+      n.style.width = n.style.height = px(size);
+      n.style.background = `conic-gradient(${col} ${v * 360}deg, rgba(255,255,255,.13) 0)`;
+      n.style.borderRadius = '50%';
+      n.style.mask = n.style.webkitMask = 'radial-gradient(circle, transparent 58%, #000 59%)';
+      const wrap = el('div', 'ring');
+      wrap.style.width = wrap.style.height = px(size);
+      wrap.style.marginBottom = node.label ? '18px' : '0';
+      const val = el('b'); val.textContent = Math.round(v * 100) + '%';
+      wrap.append(n, val);
+      if (node.label) { const s = el('span'); s.textContent = node.label; wrap.append(s); }
+      return wrap;
+    }
+    case 'keyValueRow': {
+      const n = el('div', 'kv');
+      const k = el('div', 'k'); k.textContent = node.key || '';
+      const v = el('div', 'v'); v.textContent = node.value || '';
+      n.append(k, v); return n;
+    }
+    case 'divider': return el('hr');
+    case 'spacer': { const n = el('div'); n.style.minHeight = px(node.minLength ?? 8); return n; }
+    case 'card': {
+      const n = el('div', 'card');
+      n.style.padding = px(node.padding ?? 16);
+      n.style.borderRadius = px(node.cornerRadius ?? 18);
+      if (node.backgroundHex) { n.style.background = node.backgroundHex; n.style.backdropFilter = 'none'; }
+      if (node.child) n.append(render(node.child));
+      (node.children || []).forEach(c => n.append(render(c)));
+      return n;
+    }
+    case 'checklist': {
+      const n = el('div', 'vstack'); n.style.gap = '12px';
+      (node.items || []).forEach(it => {
+        const row = el('div', 'chk');
+        const on = it.state === 'checked';
+        const b = el('div', 'box' + (on ? ' on' : ''));
+        b.textContent = on ? '✓' : '';
+        const txt = el('div');
+        const lab = el('div'); lab.textContent = it.text || it.label || '';
+        if (on) { lab.style.color = '#8E8E93'; lab.style.textDecoration = 'line-through'; }
+        txt.append(lab);
+        if (it.detail) { const d = el('div', 'detail'); d.textContent = it.detail; txt.append(d); }
+        row.append(b, txt); n.append(row);
+      });
+      return n;
+    }
+    case 'quickReplyRow': {
+      const n = el('div', 'chips');
+      (node.options || []).forEach(o => { const c = el('div', 'chip'); c.textContent = o.label || o.id; n.append(c); });
+      return n;
+    }
+    default: {
+      const n = el('div', 'unknown');
+      n.textContent = 'unrendered node: ' + (t || '?');
+      return n;
+    }
+  }
+}
+
+try {
+  const L = decodePayload();
+  if (L.accentColorHex) document.documentElement.style.setProperty('--accent', L.accentColorHex);
+  const h = el('header');
+  const t = el('h1'); t.textContent = L.title || 'HermesShare';
+  h.append(t);
+  if (L.subtitle) { const s = el('div', 'sub'); s.textContent = L.subtitle; h.append(s); }
+  const out = document.getElementById('out');
+  out.append(h);
+  if (L.root) out.append(render(L.root));
+  (L.actions || []).forEach(a => {
+    const btn = el('a', 'act');
+    btn.textContent = a.label || a.id;
+    btn.href = a.deepLinkURL || '#';
+    out.append(btn);
+  });
+  document.getElementById('foot').textContent =
+    'rendered in Spectrum’s webview from the ?p= payload · ' + JSON.stringify(L).length + ' bytes';
+} catch (e) {
+  const d = el('div', 'err');
+  d.textContent = 'Could not render card:\n' + e.message + '\n\n' + location.href.slice(0, 300);
+  document.getElementById('out').append(d);
+}
+</script>
+</body>
+</html>
