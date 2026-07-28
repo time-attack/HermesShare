@@ -54,7 +54,9 @@
   .chip {
     padding: 9px 15px; border-radius: 999px; font-size: 14px; font-weight: 500;
     background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.13);
+    color: #fff; text-decoration: none; display: inline-block;
   }
+  a.chip:active, a.act:active { opacity: .55; }
   .ring { display: grid; place-items: center; position: relative; flex: 0 0 auto; }
   .ring b { position: absolute; font-size: 15px; font-weight: 700; }
   .ring span { position: absolute; bottom: -17px; font-size: 11px; color: #8E8E93; }
@@ -81,6 +83,12 @@ const WEIGHT = { regular:400, medium:500, semibold:600, bold:700, heavy:800 };
 
 const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
 const px = v => (v == null ? null : v + 'px');
+
+// Reply target comes from the `r` query item (never hardcoded — this file is public). The sender
+// passes it as %2B<E164>. Without it, chips/actions render inert instead of dead-linking.
+const REPLY_TO = new URLSearchParams(location.search).get('r');
+const smsHref = (id, label) =>
+  REPLY_TO ? 'sms:' + REPLY_TO + '&body=' + encodeURIComponent('[hs:' + id + '] ' + label) : null;
 
 function decodePayload() {
   const p = new URLSearchParams(location.search).get('p');
@@ -184,9 +192,23 @@ function render(node) {
       return n;
     }
     case 'quickReplyRow': {
+      const wrap = el('div', 'vstack'); wrap.style.gap = '8px';
       const n = el('div', 'chips');
-      (node.options || []).forEach(o => { const c = el('div', 'chip'); c.textContent = o.label || o.id; n.append(c); });
-      return n;
+      (node.options || []).forEach(o => {
+        const label = o.label || o.id;
+        const href = smsHref(o.id, label);
+        const c = el(href ? 'a' : 'div', 'chip');
+        if (href) c.href = href;
+        c.textContent = label;
+        n.append(c);
+      });
+      wrap.append(n);
+      if (REPLY_TO) {
+        const h = el('div', 'detail');
+        h.textContent = 'Tapping a chip opens this thread with your reply ready to send.';
+        wrap.append(h);
+      }
+      return wrap;
     }
     default: {
       const n = el('div', 'unknown');
@@ -207,9 +229,14 @@ try {
   out.append(h);
   if (L.root) out.append(render(L.root));
   (L.actions || []).forEach(a => {
-    const btn = el('a', 'act');
-    btn.textContent = a.label || a.id;
-    btn.href = a.deepLinkURL || '#';
+    const label = a.label || a.id;
+    // hermesshare:// deep links only resolve in the native extension, which Photon never invokes —
+    // route them back through Messages instead so the tap still reaches the sender.
+    const native = (a.deepLinkURL || '').startsWith('hermesshare://');
+    const href = native ? smsHref(a.id, label) : a.deepLinkURL;
+    const btn = el(href ? 'a' : 'div', 'act');
+    if (href) btn.href = href;
+    btn.textContent = label;
     out.append(btn);
   });
   document.getElementById('foot').textContent =
