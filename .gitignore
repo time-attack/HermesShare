@@ -24,3 +24,4 @@ HermesShare.xcodeproj/
 
 # Local screenshot dumps at repo root (canonical assets: docs/screenshots/launch/)
 /screenshots/
+__pycache__/
