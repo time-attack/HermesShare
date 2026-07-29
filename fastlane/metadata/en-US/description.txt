@@ -1,0 +1,14 @@
+HermesShare turns structured JSON into rich, interactive, fully native cards inside Messages — package tracking, flight boards, trip plans, polls, hotel catalogs, live dashboards, and more.
+
+Instead of walls of text, an AI agent (or any backend you run) sends a compact HermesLayout document per message. HermesShare's fixed on-device renderer draws it as real native UI — no web views in the bubble, nothing downloaded or executed.
+
+WHAT YOU GET
+• Native iMessage cards: flight boarding passes with split-flap boards, courier journeys with live timelines, day plans with option pickers, RSVP quick replies, photo catalogs, weather scenes, market dashboards
+• Tap-to-reply actions: cards can insert real replies back into the conversation with one tap
+• Live previews: every card renders as a crisp preview image in the bubble, and expands to the full interactive card
+• Agent dashboard: pair the companion app with your own Hermes agent harness on your local network to watch a running agent — status, current action, todo checklist, live screenshot — including a Live Activity on your Lock Screen
+
+HOW IT WORKS
+The renderer ships inside the app, compiled and signed. Incoming messages carry declarative JSON that selects from a known vocabulary of native views — it describes what to show, never code to run. If you can produce JSON, you can send beautiful cards: from a chatbot, a CI pipeline, a home automation, or your own scripts.
+
+Open source. No account, no tracking, no data collection.

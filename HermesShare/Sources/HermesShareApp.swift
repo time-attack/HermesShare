@@ -10,11 +10,16 @@ import SwiftUI
 struct HermesShareApp: App {
     var body: some Scene {
         WindowGroup {
-            DebugHarnessView()
-                .onOpenURL { url in
-                    // Deep links fired by action buttons land here (hermesshare://…).
-                    LastDeepLink.shared.url = url
-                }
+            TabView {
+                AgentHarnessView()
+                    .tabItem { Label("Agent", systemImage: "dot.radiowaves.left.and.right") }
+                DebugHarnessView()
+                    .tabItem { Label("Cards", systemImage: "square.on.square") }
+            }
+            .onOpenURL { url in
+                // Deep links fired by action buttons land here (hermesshare://…).
+                LastDeepLink.shared.url = url
+            }
         }
     }
 }

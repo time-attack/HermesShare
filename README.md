@@ -27,34 +27,34 @@ Download SwiftUI code   →    Send HermesLayout JSON
 Run unsigned UI logic →    Map JSON → signed renderer → native SwiftUI
 ```
 
+
+
 ## Preview
 
-<p align="center">
-  <img src="docs/screenshots/launch/05-courier-journey-delivery.png" width="260" alt="Courier journey card" /><br />
-  <strong>Courier journey</strong><br />
-  <sub>Delivery arc, live timeline, door notification CTA</sub>
-</p>
+  
+**Courier journey**  
+Delivery arc, live timeline, door notification CTA
 
-<p align="center">
-  <img src="docs/screenshots/launch/10-flight-board-boarding-pass.png" width="260" alt="Flight boarding pass" /><br />
-  <strong>Flight boarding pass</strong><br />
-  <sub>Split-flap codes, boarding status, seat and baggage rows</sub>
-</p>
+  
+**Flight boarding pass**  
+Split-flap codes, boarding status, seat and baggage rows
 
-<p align="center">
-  <img src="docs/screenshots/launch/13-trip-day-plan-vote.png" width="260" alt="Trip day plan vote" /><br />
-  <strong>Trip day plan</strong><br />
-  <sub>Osaka timeline with dinner option picker</sub>
-</p>
+  
+**Trip day plan**  
+Osaka timeline with dinner option picker
 
 ## Why HermesShare
 
-| Problem | HermesShare |
-| --- | --- |
-| Long markdown walls in iMessage | Structured cards with native UI |
-| Web-view mini-apps feel disconnected | Real `MSMessageTemplateLayout` bubbles |
-| Apple blocks arbitrary runtime UI code | JSON + signed renderer (Scriptable model) |
-| Agent replies are plain text | Tap-to-reply actions insert real messages back into the thread |
+
+| Problem                                | HermesShare                                                    |
+| -------------------------------------- | -------------------------------------------------------------- |
+| Long markdown walls in iMessage        | Structured cards with native UI                                |
+| Web-view mini-apps feel disconnected   | Real `MSMessageTemplateLayout` bubbles                         |
+| Apple blocks arbitrary runtime UI code | JSON + signed renderer (Scriptable model)                      |
+| Agent replies are plain text           | Tap-to-reply actions insert real messages back into the thread |
+
+
+
 
 ## Screenshots
 
@@ -62,95 +62,67 @@ Real device captures from Messages.app — tap a bubble to expand the full card.
 
 ### Agent & productivity
 
-<p align="center">
-  <img src="docs/screenshots/launch/01-agent-checklist-dashboard.png" width="280" alt="Agent checklist dashboard" /><br />
-  <strong>Agent checklist dashboard</strong><br />
-  <sub>Multi-section checklist with done/pending states (NYU enrollment re-check)</sub>
-</p>
+  
+**Agent checklist dashboard**  
+Multi-section checklist with done/pending states (NYU enrollment re-check)
 
-<p align="center">
-  <img src="docs/screenshots/launch/11-system-health-gauges.png" width="280" alt="System health gauges" /><br />
-  <strong>System health</strong><br />
-  <sub>Gauge cluster for uptime, latency, and error rate with deploy summary</sub>
-</p>
+GS  
+**System health**  
+Gauge cluster for uptime, latency, and error rate with deploy summary
 
 ### Travel & logistics
 
-<p align="center">
-  <img src="docs/screenshots/launch/02-itinerary-flight-board.png" width="280" alt="Japan itinerary flight board" /><br />
-  <strong>Trip itinerary — flight board</strong><br />
-  <sub>Zipair NRT → SJC hero inside a multi-day travel plan</sub>
-</p>
+  
+**Trip itinerary — flight board**  
+Zipair NRT → SJC hero inside a multi-day travel plan
 
-<p align="center">
-  <img src="docs/screenshots/launch/03-itinerary-hotel-and-flight.png" width="280" alt="Hotel and flight timeline" /><br />
-  <strong>Hotel + flight timeline</strong><br />
-  <sub>Tokyo hotel stay block and chronological departure schedule</sub>
-</p>
+  
+**Hotel + flight timeline**  
+Tokyo hotel stay block and chronological departure schedule
 
-<p align="center">
-  <img src="docs/screenshots/launch/04-itinerary-travel-checklist.png" width="280" alt="Travel checklist" /><br />
-  <strong>Travel checklist</strong><br />
-  <sub>Pre-departure todos — train QR, check-in, baggage</sub>
-</p>
+  
+**Travel checklist**  
+Pre-departure todos — train QR, check-in, baggage
 
-<p align="center">
-  <img src="docs/screenshots/launch/10-flight-board-boarding-pass.png" width="280" alt="Flight boarding pass" /><br />
-  <strong>Flight boarding pass</strong><br />
-  <sub>BR 26 TPE → SFO — split-flap board, boarding status, seat/baggage, CTA</sub>
-</p>
+  
+**Flight boarding pass**  
+BR 26 TPE → SFO — split-flap board, boarding status, seat/baggage, CTA
 
-<p align="center">
-  <img src="docs/screenshots/launch/05-courier-journey-delivery.png" width="280" alt="Courier journey" /><br />
-  <strong>Courier journey</strong><br />
-  <sub>Package delivery arc, live timeline, notify-at-door action</sub>
-</p>
+  
+**Courier journey**  
+Package delivery arc, live timeline, notify-at-door action
 
-<p align="center">
-  <img src="docs/screenshots/launch/07-map-preview-driver-arriving.png" width="280" alt="Map preview driver arriving" /><br />
-  <strong>Map preview</strong><br />
-  <sub>MapKit preview with Hermes courier, vehicle details, contact driver CTA</sub>
-</p>
+  
+**Map preview**  
+MapKit preview with Hermes courier, vehicle details, contact driver CTA
 
 ### Interactive & social
 
-<p align="center">
-  <img src="docs/screenshots/launch/13-trip-day-plan-vote.png" width="280" alt="Trip day plan vote" /><br />
-  <strong>Trip day plan</strong><br />
-  <sub>Date badge, Osaka timeline, option picker to vote on dinner</sub>
-</p>
+  
+**Trip day plan**  
+Date badge, Osaka timeline, option picker to vote on dinner
 
-<p align="center">
-  <img src="docs/screenshots/launch/09-quick-reply-dinner-rsvp.png" width="280" alt="Quick reply dinner RSVP" /><br />
-  <strong>Quick reply</strong><br />
-  <sub>One-tap RSVP chips for a group dinner invite</sub>
-</p>
+  
+**Quick reply**  
+One-tap RSVP chips for a group dinner invite
 
-<p align="center">
-  <img src="docs/screenshots/launch/12-kyoto-hotel-catalog.png" width="280" alt="Kyoto hotel catalog" /><br />
-  <strong>Photo catalog</strong><br />
-  <sub>Full-bleed Kyoto hotel cards with price pills and room gallery</sub>
-</p>
+  
+**Photo catalog**  
+Full-bleed Kyoto hotel cards with price pills and room gallery
 
 ### Live data & scenes
 
-<p align="center">
-  <img src="docs/screenshots/launch/14-weather-tonight-sky.png" width="280" alt="Weather tonight sky scene" /><br />
-  <strong>Weather tonight</strong><br />
-  <sub>Drawn sky scene with temperature, location, and stat strip</sub>
-</p>
+  
+**Weather tonight**  
+Drawn sky scene with temperature, location, and stat strip
 
-<p align="center">
-  <img src="docs/screenshots/launch/08-market-pulse-sparklines.png" width="280" alt="Market pulse sparklines" /><br />
-  <strong>Market pulse</strong><br />
-  <sub>Dual sparkline tiles for NVDA and TSLA positions</sub>
-</p>
+  
+**Market pulse**  
+Dual sparkline tiles for NVDA and TSLA positions
 
-<p align="center">
-  <img src="docs/screenshots/launch/06-game-final-scoreboard.png" width="280" alt="Game final scoreboard" /><br />
-  <strong>Game final</strong><br />
-  <sub>Lakers vs Celtics scoreboard with field-goal percentage bars</sub>
-</p>
+  
+**Game final**  
+Lakers vs Celtics scoreboard with field-goal percentage bars
 
 ## How it works
 
@@ -163,9 +135,9 @@ HermesLayout JSON  ──send──►  MSMessage bubble  ──tap──►  He
 
 1. **Schema** — `HermesLayout` is a JSON document: metadata + recursive `HermesNode` tree.
 2. **Transport** — payload is base64url-encoded in `MSMessage.url` (`?p=...`), via Photon
-   `customizedMiniApp()` with an `https://` URL.
+  `customizedMiniApp()` with an `https://` URL.
 3. **Renderer** — the signed app interprets each JSON node type and builds native SwiftUI (fixed
-   vocabulary — no downloaded code, no runtime compilation).
+  vocabulary — no downloaded code, no runtime compilation).
 4. **Actions** — `hermesshare://action?...` buttons insert reply messages into the thread.
 
 Full JSON reference: [docs/LAYOUT.md](docs/LAYOUT.md)  
@@ -176,8 +148,10 @@ Sending guide: [docs/SENDING.md](docs/SENDING.md)
 ```text
 HermesShare/
 ├── Shared/                    Swift package — schema, Codable, renderer, samples
-├── HermesShare/               Host app (debug harness for fast iteration)
+├── HermesShare/               Host app (debug harness + live agent dashboard)
 ├── HermesShareExtension/      iMessage App Extension (MessagesViewController)
+├── HermesAgentWidget/         Live Activity widget (lock screen / Dynamic Island)
+├── harness/                   Agent harness server + hermes-harness CLI (see harness/README.md)
 ├── docs/
 │   ├── LAYOUT.md              HermesLayout authoring guide
 │   ├── SENDING.md             Photon / transport instructions
@@ -186,6 +160,16 @@ HermesShare/
 └── project.yml                XcodeGen project definition
 ```
 
+## Live agent harness
+
+The host app doubles as a live monitor for a running Hermes agent: pair the phone with
+the harness server (`harness/`), and the **Agent** tab shows the agent's todo list,
+current task, current action, and a live preview screenshot — mirrored into a
+**Live Activity** on the lock screen and Dynamic Island. See
+[harness/README.md](harness/README.md).
+
+
+
 ## Requirements
 
 - macOS with **Xcode 26+**
@@ -193,7 +177,11 @@ HermesShare/
 - [XcodeGen](https://github.com/yonaskolb/XcodeGen): `brew install xcodegen`
 - Apple Development signing identity (free account works for Simulator and sideloading)
 
+
+
 ## Quick start
+
+
 
 ### 1. Clone and generate the Xcode project
 
@@ -203,6 +191,8 @@ cd HermesShare
 xcodegen generate
 open HermesShare.xcodeproj
 ```
+
+
 
 ### 2. Configure code signing
 
@@ -240,6 +230,8 @@ layouts, or tap `{}` to paste/edit live JSON and watch it render with inline val
 2. Open **Messages** → any conversation → tap **+** → App Store icon → **HermesShare**.
 3. In **Debug** Simulator builds, a compose gallery inserts sample cards into the thread.
 4. Tap a bubble to expand; action buttons insert reply messages.
+
+
 
 ### 6. Run tests
 

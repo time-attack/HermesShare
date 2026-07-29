@@ -45,9 +45,11 @@ def swift_enum_cases(src: str, anchor: str) -> set[str]:
 def load_schema() -> dict:
     layout = LAYOUT.read_text()
     codable = CODABLE.read_text()
-    # Node types are the `case foo` list of the NodeType enum used by the decoder switch.
-    node_types = set(re.findall(r"case\s+(\w+)\s*$", "", re.M))
-    m = re.search(r"enum\s+NodeType\s*:\s*String[^{]*\{(.*?)\n\s*\}", codable, re.S)
+    # Node types are the `case foo` list of the decoder's discriminator enum. It is named
+    # `Kind` in HermesLayoutCodable.swift; the old `NodeType` spelling never matched, which
+    # left nodeTypes empty and silently disabled node-type checking entirely.
+    node_types: set[str] = set()
+    m = re.search(r"enum\s+(?:Kind|NodeType)\s*:\s*String[^{]*\{(.*?)\n\s*\}", codable, re.S)
     if m:
         for line in m.group(1).splitlines():
             line = re.sub(r"//.*", "", line)

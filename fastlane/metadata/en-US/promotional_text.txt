@@ -1,0 +1,1 @@
+Rich, native, interactive cards inside iMessage — flight boards, package tracking, polls, dashboards — described by JSON, rendered on device.

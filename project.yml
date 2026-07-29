@@ -32,6 +32,7 @@ targets:
     dependencies:
       - package: HermesShared
       - target: HermesShareExtension          # embedded automatically
+      - target: HermesAgentWidget             # Live Activity widget
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.hermesshare.app
@@ -43,8 +44,20 @@ targets:
       properties:
         CFBundleDisplayName: HermesShare
         UILaunchScreen: {}
+        NSSupportsLiveActivities: true
+        NSSupportsLiveActivitiesFrequentUpdates: true
+        NSAppTransportSecurity:
+          # The harness pairs with a dev server on the local network over plain
+          # http/ws (LAN IP, no cert). Local networking only — arbitrary loads
+          # would get flagged in App Review.
+          NSAllowsLocalNetworking: true
+        NSLocalNetworkUsageDescription: >-
+          HermesShare connects to your Hermes agent harness server on the local
+          network to stream live agent status.
+        ITSAppUsesNonExemptEncryption: false
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         CFBundleURLTypes:
@@ -72,6 +85,25 @@ targets:
         NSExtension:
           NSExtensionPointIdentifier: com.apple.message-payload-provider
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).MessagesViewController
+
+  # ---------------- Live Activity widget extension ----------------
+  HermesAgentWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - HermesAgentWidget/Sources
+    dependencies:
+      - package: HermesShared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hermesshare.app.AgentWidget
+    info:
+      path: HermesAgentWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Hermes Agent
+        NSSupportsLiveActivities: true
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
 
   # ---------------- Unit tests for the shared model ----------------
   HermesSharedTests:
